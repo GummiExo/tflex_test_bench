@@ -9,15 +9,15 @@ from std_msgs.msg import Float64
 class LoadSensor(object):
     def __init__(self):
         '''Parameters Inicialization '''
-        self.serial_port = rospy.get_param("port","/dev/ttyUSB0")
+        self.serial_port = rospy.get_param("port","/dev/ttyUSB1")
         os.system("sudo chmod 777 " + self.serial_port) #Enabling port permissions
         self.port_parameters = {
                                  "br": rospy.get_param("baud_rate", 9600),
                                  "bs": rospy.get_param("byte_size", 8),
                                  "p": rospy.get_param("parity", 'E'),
                                  "sb": rospy.get_param("stop_bits", 1),
-                                 "adc_f": rospy.get_param("adc_frequency",460)}
-        #self.ser = serial.Serial(self.serial_port, self.port_parameters["br"], bytesize=self.port_parameters["bs"], parity=self.port_parameters["p"] , stopbits=self.port_parameters["sb"])
+                                 "adc_f": rospy.get_param("adc_frequency",960)}
+        self.ser = serial.Serial(self.serial_port, self.port_parameters["br"], bytesize=self.port_parameters["bs"], parity=self.port_parameters["p"] , stopbits=self.port_parameters["sb"])
         self.num_decoding = {
                             "0x7e": 0, "0x3e":0, "0x9f":0, "0x6e":0, "0xee":0,
                             "0x9d":1, "0x3a":1, "0x9d":1, "0x67":1,
@@ -50,7 +50,7 @@ class LoadSensor(object):
                     return load
                 except:
                     rospy.logwarn("Unrecognized Data: ",data2);
-                    #print("x", "    ", data2)
+                    print("x", "    ", data2)
         else:
             time.sleep(1/(self.port_parameters["adc_f"]))
             self.read_data()
@@ -61,9 +61,10 @@ def main():
     rate = rospy.Rate(load_sensor.fs)
     rospy.loginfo('Mining Data')
     while not rospy.is_shutdown():
-        #load = load_sensor.read_data()
-        load = random.random() + random.randrange(0, 10)
-        load_sensor.pub.publish(load)
+        load = load_sensor.read_data()
+        #load = random.random() + random.randrange(0, 10)
+        if (load != 0.0):
+            load_sensor.pub.publish(load)
         rate.sleep()
     load_sensor.ser.close()
     rospy.loginfo('Closed Port')
