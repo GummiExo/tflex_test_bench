@@ -82,7 +82,7 @@ class IMU_BNO055:
         self.node_name = 'imu_data_acquisition2'
         rospy.init_node(self.node_name, anonymous = True)
         self.pub = rospy.Publisher("/imu_data", IMUData, queue_size = 1, latch = False)
-        self.pub = rospy.Publisher("/imu_data/euler_angles", euler_msg, queue_size = 1, latch = False)
+        self.pub_euler = rospy.Publisher("/imu_data/euler_angles", euler_msg, queue_size = 1, latch = False)
         rospy.Subscriber("kill_gait_assistance", Bool, self.updateFlagImuAcquisition)
         self.kill_flag = False
 
