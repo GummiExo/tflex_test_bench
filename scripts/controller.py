@@ -6,7 +6,7 @@ import sys
 import dmx_firmware
 import rospy
 from dynamixel_workbench_msgs.srv import JointCommand, TorqueEnable
-from std_msgs.msg import Bool, Float64
+from std_msgs.msg import Bool, Float64, Int8
 
 class Controller(object):
     def __init__(self):
@@ -28,15 +28,15 @@ class Controller(object):
         self.speed = 5*1024/10 #Max Speed Value: 1024
         self.frecuency = 1 #Hz
         set_motor_speed(self.speed)
-        self.option_controller = 1
+        self.option_controller = 2
         ''' Subscribers '''
-        rospy.Subscriber("/tflex_test_bench/kill_controller", Bool, self.updateFlagController)
+        rospy.Subscriber("/tflex_test_bench/option_controller", Int8, self.updateOptionController)
         rospy.Subscriber("/tflex_test_bench/update_speed", Float64, self.updateSpeed)
         rospy.Subscriber("/tflex_test_bench/update_frequency", Float64, self.updateFrequency)
         ''' Node Configuration '''
         rospy.init_node('tflex_test_bench_controller', anonymous = True)
 
-    def updateFlagController(self, option):
+    def updateOptionController(self, option):
         self.option_controller = option.data
 
     def updateSpeed(self, speed):
@@ -46,7 +46,7 @@ class Controller(object):
         self.frequency = frecuency.data
 
     def automatic_movement(self):
-        rospy.loginfo("------------------------ AUTO-MOVEMENT STARTED ------------------------")
+        #rospy.loginfo("------------------------ AUTO-MOVEMENT STARTED ------------------------")
         if (self.option_controller == 1):
             ''' Position Publisher Motor ID 1 and Motor ID 2'''
             # set_position(self.ValueToPubUp1,self.ValueToPubDown2)
@@ -56,11 +56,11 @@ class Controller(object):
             self.motor_position_command(val_motor1 = self.ValueToPubDown1, val_motor2 = self.ValueToPubUp2)
             time.sleep(1/self.frecuency)
         else:
-            break
-        rospy.loginfo("------------------------ AUTO-MOVEMENT FINISHED -----------------------")
+            return
+        #rospy.loginfo("------------------------ AUTO-MOVEMENT FINISHED -----------------------")
 
     def increase_stiffness(self):
-        rospy.loginfo("------------------------ INCREASE-SITFFNESS STARTED ------------------------")
+        #rospy.loginfo("------------------------ INCREASE-SITFFNESS STARTED ------------------------")
         if (self.option_controller == 2):
             ''' Position Publisher Motor ID 1 and Motor ID 2'''
             self.motor_position_command(val_motor1 = self.ValueStiffness1, val_motor2 = self.ValueStiffness2)
@@ -68,17 +68,19 @@ class Controller(object):
             self.motor_position_command(val_motor1 = self.ValueToPubDown1, val_motor2 = self.ValueToPubDown2)
             time.sleep(1/self.frecuency)
         else:
-            break
-        rospy.loginfo("------------------------ INCREASE-STIFFNESS FINISHED -----------------------")
+            return
+        #rospy.loginfo("------------------------ INCREASE-STIFFNESS FINISHED -----------------------")
 
     def process(self):
         if (self.option_controller == 1):
             self.automatic_movement()
+            return 1
         elif (self.option_controller == 2):
             self.increase_stiffness()
+            return 1
         else:
             release_motors()
-        release_motors()
+            return 0
 
     def motor_position_command(self, val_motor1 = 0, val_motor2 = 0):
         #create service handler for motor1
@@ -121,8 +123,12 @@ def set_motor_speed(speed):
 def main():
     c = Controller()
     rospy.on_shutdown(release_motors)
+    rospy.loginfo("Tests:\n1.Angle Test\n2.Stiffness Test\n3.Exit")
     while not (rospy.is_shutdown()):
-        c.process()
+        resp = c.process()
+        if (resp == 0):
+            break
+    release_motors()
     rospy.loginfo("Controller Finished")
 
 if __name__ == '__main__':

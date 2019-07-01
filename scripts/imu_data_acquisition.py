@@ -2,6 +2,7 @@
 import rospy
 from tflex_test_bench.msg import IMUData
 from std_msgs.msg import Bool
+from geometry_msgs.msg import Vector3 as euler_msg
 import smbus
 import time
 import ctypes
@@ -81,6 +82,7 @@ class IMU_BNO055:
         self.node_name = 'imu_data_acquisition2'
         rospy.init_node(self.node_name, anonymous = True)
         self.pub = rospy.Publisher("/imu_data", IMUData, queue_size = 1, latch = False)
+        self.pub = rospy.Publisher("/imu_data/euler_angles", euler_msg, queue_size = 1, latch = False)
         rospy.Subscriber("kill_gait_assistance", Bool, self.updateFlagImuAcquisition)
         self.kill_flag = False
 
@@ -504,7 +506,7 @@ def main():
     while not rospy.is_shutdown():
         if not sensor.kill_flag:
             # Read the Euler angles for heading, roll, pitch (all in degrees).
-            # sensor.read_eul()
+            sensor.read_eul()
             # Read the calibration status, 0=uncalibrated and 3=fully calibrated.
             # sys, gyro, accel, mag = sensor.read_calib()
             # Other values you can optionally read:
@@ -547,8 +549,12 @@ def main():
             msg.quat_y = sensor.quat['y']
             msg.quat_z = sensor.quat['z']
             msg.quat_w = sensor.quat['w']
+            euler_msg().x = sensor.euler['x']
+            euler_msg().y = sensor.euler['y']
+            euler_msg().z = sensor.euler['z']
             # msg.angle = knee_angle
             sensor.pub.publish(msg)
+            sensor.pub_euler.publish(euler_msg)
             rate.sleep()
         else:
             break

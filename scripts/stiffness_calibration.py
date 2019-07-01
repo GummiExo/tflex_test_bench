@@ -12,10 +12,10 @@ class T_FlexCalibration(object):
         os.chdir(home + '/catkin_ws/src/tflex_test_bench/yaml')
         f = open("motor_position_values.yaml", "r+")
         params = [f.readline().strip().split()[1] for i in range(4)]
-        self.max_value_motor1 = float(params[0])
-        self.min_value_motor1 = float(params[1])
-        self.max_value_motor2 = float(params[2])
-        self.min_value_motor2 = float(params[3])
+        self.min_value_motor1 = float(params[0])
+        self.max_value_motor1 = float(params[1])
+        self.min_value_motor2 = float(params[2])
+        self.max_value_motor2 = float(params[3])
         self.variable_stiffness_angle1 = self.max_value_motor1
         self.variable_stiffness_angle2 = self.min_value_motor2
         self.Motor1State = None
@@ -43,7 +43,7 @@ class T_FlexCalibration(object):
             if self.isMotorAngleUpdated == True:
 				if self.Motor1State.present_position < self.variable_stiffness_angle1:
 					self.variable_stiffness_angle1  = self.Motor1State.present_position
-				if self.Motor2State.present_position > self.variable_stiffness_angle2:
+				if self.Motor2State.present_position < self.variable_stiffness_angle2:
 					self.variable_stiffness_angle2  = self.Motor2State.present_position
 				self.isMotorAngleUpdated = False
         rospy.loginfo("Calibration Thread Finished")

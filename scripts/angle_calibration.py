@@ -9,13 +9,13 @@ from std_msgs.msg import Bool
 class T_FlexCalibration(object):
     def __init__(self):
         home = os.path.expanduser('~')
-        os.chdir(home + '/catkin_ws/src/t_flex/yaml')
+        os.chdir(home + '/catkin_ws/src/tflex_test_bench/yaml')
         f = open("motor_position_values.yaml", "r+")
         params = [f.readline().strip().split()[1] for i in range(4)]
-        self.max_value_motor1 = float(params[0])
-        self.min_value_motor1 = float(params[1])
-        self.max_value_motor2 = float(params[2])
-        self.min_value_motor2 = float(params[3])
+        self.min_value_motor1 = float(params[0])
+        self.max_value_motor1 = float(params[1])
+        self.min_value_motor2 = float(params[2])
+        self.max_value_motor2 = float(params[3])
         self.max_angle_motor1 = self.min_value_motor1
         self.min_angle_motor1 = self.max_value_motor1
         self.max_angle_motor2 = self.min_value_motor2
@@ -57,8 +57,8 @@ class T_FlexCalibration(object):
     def process(self):
         self.ValueToPubUp1= self.min_angle_motor1
         self.ValueToPubDown1= self.max_angle_motor1
-        self.ValueToPubUp2 = self.max_angle_motor2
-        self.ValueToPubDown2= self.min_angle_motor2
+        self.ValueToPubUp2 = self.min_angle_motor2
+        self.ValueToPubDown2= self.max_angle_motor2
         # Validation Motor id 1
         if self.ValueToPubUp1 > self.max_value_motor1:
             self.ValueToPubUp1 = self.max_value_motor1
