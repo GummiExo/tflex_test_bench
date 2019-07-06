@@ -2,7 +2,7 @@
 import rospy
 from tflex_test_bench.msg import IMUData
 from std_msgs.msg import Bool
-from geometry_msgs.msg import Vector3 as euler_msg
+from geometry_msgs.msg import Vector3
 import smbus
 import time
 import ctypes
@@ -82,7 +82,7 @@ class IMU_BNO055:
         self.node_name = 'imu_data_acquisition2'
         rospy.init_node(self.node_name, anonymous = True)
         self.pub = rospy.Publisher("/imu_data", IMUData, queue_size = 1, latch = False)
-        self.pub_euler = rospy.Publisher("/imu_data/euler_angles", euler_msg, queue_size = 1, latch = False)
+        self.pub_euler = rospy.Publisher("/imu_data/euler_angles", Vector3, queue_size = 1, latch = False)
         rospy.Subscriber("kill_gait_assistance", Bool, self.updateFlagImuAcquisition)
         self.kill_flag = False
 
@@ -452,10 +452,11 @@ class IMU_BNO055:
     SBy = enum('t_00_5ms', 't_62_5ms', 't_125ms', 't_250ms', 't_500ms', 't_1000ms', 't_2000ms', 't_4000ms',)
 
 def main():
-    sensor = IMU_BNO055(bus=1, address=0x29)
+    sensor = IMU_BNO055(bus=3, address=0x29)
 
     # Parameters of ROS message
     msg = IMUData()
+    euler_msg = Vector3()
     rate = rospy.Rate(100)   # 100 Hz
     start_time = time.time()
 
@@ -549,9 +550,9 @@ def main():
             msg.quat_y = sensor.quat['y']
             msg.quat_z = sensor.quat['z']
             msg.quat_w = sensor.quat['w']
-            euler_msg().x = sensor.euler['x']
-            euler_msg().y = sensor.euler['y']
-            euler_msg().z = sensor.euler['z']
+            euler_msg.x = sensor.euler['x']
+            euler_msg.y = sensor.euler['y']
+            euler_msg.z = sensor.euler['z']
             # msg.angle = knee_angle
             sensor.pub.publish(msg)
             sensor.pub_euler.publish(euler_msg)

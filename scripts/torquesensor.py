@@ -37,23 +37,26 @@ class LoadSensor(object):
         self.fs = 100
 
     def read_data(self):
-        data_header = self.ser.read(1)
-        if (hex(ord(data_header)) == '0x3f'):
-            data = map(hex, map(ord, self.ser.read(14)))
-            if "0x3f" in data:
+        try:
+            data_header = self.ser.read(1)
+            if (hex(ord(data_header)) == '0x3f'):
+                data = map(hex, map(ord, self.ser.read(14)))
+                if "0x3f" in data:
+                    time.sleep(1/(self.port_parameters["adc_f"]))
+                    self.read_data()
+                else:
+                    sign = self.sign_decoding.get(data[3], 1)
+                    try:
+                        load = sum([ sign*self.num_decoding[data[i]]*(10.0**(6-i)) for i in range(5,10)])
+                        return load
+                    except:
+                        rospy.logwarn("Unrecognized Data: ",data);
+                        print("x", "    ", data2)
+            else:
                 time.sleep(1/(self.port_parameters["adc_f"]))
                 self.read_data()
-            else:
-                sign = self.sign_decoding.get(data[3], 1)
-                try:
-                    load = sum([ sign*self.num_decoding[data[i]]*(10.0**(6-i)) for i in range(5,10)])
-                    return load
-                except:
-                    rospy.logwarn("Unrecognized Data: ",data2);
-                    print("x", "    ", data2)
-        else:
-            time.sleep(1/(self.port_parameters["adc_f"]))
-            self.read_data()
+        except:
+            rospy.logwarn("Data not received")
 
 
 def main():
