@@ -17,8 +17,8 @@ class Controller(object):
         rospy.init_node('tflex_test_bench_topics_synchronization', anonymous = True)
         self.pub_cmd_motor1 = rospy.Publisher("/tilt1_controller/command", Float64, queue_size = 1, latch = False)
         self.pub_cmd_motor2 = rospy.Publisher("/tilt2_controller/command", Float64, queue_size = 1, latch = False)
-        self.pub_singal_norm_motor1 = rospy.Publisher("/goal_position_motor1", Int16, queue_size = 1, latch = False)  
-        self.t = [i*0.01 for i in range(10000)]
+        self.pub_singal_norm_motor1 = rospy.Publisher("/goal_position_motor1", Int16, queue_size = 1, latch = False)
+        self.t = [i*0.01 for i in range(12000)]
         self.sin = []
         for i in range(len(self.t)):
             self.sin.append(0.35*math.pi*math.sin(0.5*2*math.pi*self.t[i]))
@@ -27,8 +27,9 @@ class Controller(object):
         ''' Chirp Signal '''
         f0 = 0
         f1 = 30
-        t1 = 50
+        t1 = 60
         self.chirp_signal = scipy.signal.chirp(self.t, f0, t1, f1, method='linear', phi=0, vertex_zero=True)
+        print(len(self.chirp_signal))
 
     def sin_signal(self):
         self.pub_cmd_motor1.publish(self.sin[self.i])
@@ -38,7 +39,7 @@ class Controller(object):
             self.i = 0
 
     def step_signal(self):
-        f = 0.8 
+        f = 0.8
         #max_range = 0.3068
         max_range = 0.9
         self.pub_cmd_motor1.publish(max_range)
@@ -47,14 +48,16 @@ class Controller(object):
         self.pub_cmd_motor1.publish(0)
         self.pub_cmd_motor2.publish(-max_range)
         time.sleep(1/f) # Period
-        
+
     def chirp_publisher(self):
-        self.pub_cmd_motor1.publish(self.chirp_signal[self.i])
+        factor_motor1 = 0.4
+        self.pub_cmd_motor1.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
+        self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]-factor_motor1)
         print(self.chirp_signal[self.i])
         self.i+=1
         if self.i == len(self.chirp_signal):
             self.i = 0
-        
+
 
 def main():
 
@@ -66,6 +69,7 @@ def main():
         #c.sin_signal()
         #c.step_signal()
         c.chirp_publisher()
+        rate.sleep()
         if c.i == 0:
             break
         #i= i+1
