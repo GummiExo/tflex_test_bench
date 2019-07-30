@@ -1,65 +1,69 @@
 clear all; clc; close all;
-%Read Trials
-trials_dir = '../tflex_trials/test.bag';
-bag_test = rosbag(trials_dir);
+addpath('./src')
+motor_characteristics = ReadYaml('../../yaml/tilt.yaml');
 
-%% Topics
+%% Read Trials
+%trials_dir = '../tflex_trials/pretension20N/pretension.bag';
+%trials_dir = '../tflex_trials/test_tendon_adjuste3.bag';
+bag = rosbag(trials_dir);
 
-%Dynamixel Motors
-frontal_dynamixel_status_topic = select(bag_test,'Topic','/motor_states/frontal_tilt_port');
-frontal_dynamixel_status_msgs = readMessages(frontal_dynamixel_status_topic,'DataFormat','struct');
-posterior_dynamixel_status_topic = select(bag_test,'Topic','/motor_states/posterior_tilt_port');
-posterior_dynamixel_status_msgs = readMessages(posterior_dynamixel_status_topic,'DataFormat','struct');
-cat_data = cat(1,frontal_dynamixel_status_msgs{:,1});
-motor_states_frontal = cat(1,cat_data(:).MotorStates);
-clear cat_data;
-cat_data = cat(1,posterior_dynamixel_status_msgs{:,1});
-motor_states_posterior = cat(1,cat_data(:).MotorStates);
-clear cat_data;
+
+%% Read Topics
+[motor_states_frontal, motor_states_posterior, load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag);
+%[load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag);
+
+%Normalized Timestamp
+motor_states_frontal.Timestamp = motor_states_frontal.Timestamp - bag.StartTime;
+motor_states_posterior.Timestamp = motor_states_posterior.Timestamp - bag.StartTime;
+load_data.Timestamp = load_data.Timestamp - bag.StartTime;
+frontal_loadcell_data.Timestamp = frontal_loadcell_data.Timestamp - bag.StartTime;
+posterior_loadcell_data.Timestamp = posterior_loadcell_data.Timestamp - bag.StartTime;
+tilt1_command_data.Timestamp = tilt1_command_data.Timestamp - bag.StartTime;
+tilt2_command_data.Timestamp = tilt2_command_data.Timestamp - bag.StartTime;
+
+
+%% Motor Characteristics
+
+%Position to Degrees
+motor_states_frontal.Present_Angle = (double(motor_states_frontal.Position) - double(motor_characteristics.tilt1_controller.motor.init))*360.0/4095.0;
+motor_states_frontal.Goal_Angle = (double(motor_states_frontal.Goal) - double(motor_characteristics.tilt1_controller.motor.init))*360.0/4095.0;
+motor_states_posterior.Present_Angle = (double(motor_characteristics.tilt2_controller.motor.init) - double(motor_states_posterior.Position))*360.0/4095.0;
+motor_states_posterior.Goal_Angle = (double(motor_characteristics.tilt2_controller.motor.init) - double(motor_states_posterior.Goal))*360.0/4095.0;
+
+%Load to percentage
+motor_states_frontal.Load_Percentage = motor_states_frontal.Load*100;
+motor_states_posterior.Load_Percentage = motor_states_posterior.Load*100;
+
+%tilt_command to degrees
+tilt1_command_data.Angle = tilt1_command_data.Data*180/pi;
+tilt2_command_data.Angle = tilt2_command_data.Data*180/pi;
+
+%% Loadcell Characteristics
+frontal_initial_voltage = 3.91496;
+posterior_initial_voltage = 1.8084;
+frontal_loadcell_data.Force = ((frontal_loadcell_data.Data - frontal_initial_voltage)/0.0312)*9.8;
+posterior_loadcell_data.Force = ((posterior_loadcell_data.Data - posterior_initial_voltage)/0.0246)*9.8;
+
+%Tendon Force
+frontal_inclination = deg2rad(87);
+frontal_loadcell_data.Tendon_Force = frontal_loadcell_data.Force/sin(frontal_inclination);
+posterior_inclination = deg2rad(69);
+posterior_loadcell_data.Tendon_Force = posterior_loadcell_data.Force/sin(posterior_inclination);
+
+%% Plots
+%Goal vs Present Position
+figure(1); 
+    subplot(1,2,1); plot(motor_states_frontal.Timestamp, motor_states_frontal.Goal_Angle); hold on; plot(motor_states_frontal.Timestamp, motor_states_frontal.Present_Angle);
+    subplot(1,2,2); plot(motor_states_posterior.Timestamp, motor_states_posterior.Goal_Angle); hold on; plot(motor_states_posterior.Timestamp, motor_states_posterior.Present_Angle);
+
+%Force Tendon
+figure(2)
+    plot(frontal_loadcell_data.Tendon_Force); hold on;
+    plot(posterior_loadcell_data.Tendon_Force);
 
 %Torque Sensor
-load_data_topic = select(bag_test,'Topic','/load_data');
-load_data_msgs = readMessages(load_data_topic,'DataFormat','struct');
-cat_data = cat(1,load_data_topic.MessageList{:,1});
-load_data(:,1) = cat_data;
-clear cat_data;
-cat_data = cat(1,load_data_msgs{:,1});
-load_data(:,2) = cat_data.Data;
-clear cat_data;
-
-%Loadcell sensors
-frontal_loadcell_data_topic = select(bag_test,'Topic','/frontal_loadcell_data');
-frontal_loadcell_data_msgs = readMessages(frontal_loadcell_data_topic,'DataFormat','struct');
-posterior_loadcell_data_topic = select(bag_test,'Topic','/posterior_loadcell_data');
-posterior_loadcell_data_msgs = readMessages(posterior_loadcell_data_topic,'DataFormat','struct');
-cat_data = cat(1,frontal_loadcell_data_topic.MessageList{:,1});
-frontal_loadcell_data(:,1) = cat_data;
-clear cat_data;
-cat_data = cat(1,frontal_loadcell_data_msgs{:,1});
-frontal_loadcell_data(:,2) = cat_data.Data;
-clear cat_data;
-cat_data = cat(1,posterior_loadcell_data_topic.MessageList{:,1});
-posterior_loadcell_data(:,1) = cat_data;
-clear cat_data;
-cat_data = cat(1,posterior_loadcell_data_msgs{:,1});
-posterior_loadcell_data(:,2) = cat_data.Data;
-clear cat_data;
-
-% Dynamixel Commands
-tilt1_command_topic = select(bag_test,'Topic','/tilt1_controller/command');
-tilt1_command_msgs = readMessages(tilt1_command_topic,'DataFormat','struct');
-tilt2_command_topic = select(bag_test,'Topic','/tilt2_controller/command');
-tilt2_command_msgs = readMessages(tilt2_command_topic,'DataFormat','struct');
-cat_data = cat(1,tilt1_command_topic.MessageList{:,1});
-tilt1_command_data(:,1) = cat_data;
-clear cat_data;
-cat_data = cat(1,tilt1_command_msgs{:,1});
-tilt1_command_data(:,2) = cat_data.Data;
-clear cat_data;
-
-
-
-
-
-
-
+figure(3)
+    subplot(2,1,1); plot(load_data.Timestamp,load_data.Data);
+     subplot(2,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage); hold on;
+                     plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage);
+    

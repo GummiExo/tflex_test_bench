@@ -41,7 +41,7 @@ class Controller(object):
     def step_signal(self):
         f = 0.8
         #max_range = 0.3068
-        max_range = 0.9
+        max_range = 0.7
         self.pub_cmd_motor1.publish(max_range)
         self.pub_cmd_motor2.publish(0)
         time.sleep(1/f) # Period
@@ -67,16 +67,16 @@ def main():
     i = 0
     while not (rospy.is_shutdown()):
         #c.sin_signal()
-        #c.step_signal()
-        c.chirp_publisher()
-        rate.sleep()
-        if c.i == 0:
-            break
-        #i= i+1
-        #if (i == 1):
-            #c.pub_cmd_motor1.publish(0)
-            #c.pub_cmd_motor2.publish(1)
-            #break;
+        c.step_signal()
+        #c.chirp_publisher()
+        #rate.sleep()
+        #if c.i == 0:
+            #break
+        i= i+1
+        if (i == 5):
+            c.pub_cmd_motor1.publish(0)
+            c.pub_cmd_motor2.publish(0)
+            break;
     rospy.loginfo("Synchronization Finished")
 
 if __name__ == '__main__':
