@@ -14,7 +14,7 @@ class LoadCellSensor(object):
         self.port_parameters = { "br": rospy.get_param("baud_rate", 115200) }
         self.ser = serial.Serial(self.serial_port, self.port_parameters["br"])
         self.pub_frontal = rospy.Publisher("frontal_loadcell_data", Float64, queue_size = 1, latch = False)
-        self.pub_posterior = rospy.Publisher("posterior_loadcell1_data", Float64, queue_size = 1, latch = False)
+        self.pub_posterior = rospy.Publisher("posterior_loadcell_data", Float64, queue_size = 1, latch = False)
         ''' Node Configuration '''
         rospy.init_node('loadcell_sensor', anonymous = True)
         self.fs = 200
