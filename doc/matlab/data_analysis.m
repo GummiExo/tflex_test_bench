@@ -4,7 +4,8 @@ motor_characteristics = ReadYaml('../../yaml/tilt.yaml');
 
 %% Read Trials
 %trials_dir = '../tflex_trials/pretension20N/pretension.bag';
-%trials_dir = '../tflex_trials/test_tendon_adjuste3.bag';
+%trials_dir = '../tflex_trials/tension20N/step_response1.bag';
+trials_dir = '../tflex_trials/test_posterior.bag';
 bag = rosbag(trials_dir);
 
 
@@ -40,7 +41,7 @@ tilt2_command_data.Angle = tilt2_command_data.Data*180/pi;
 
 %% Loadcell Characteristics
 frontal_initial_voltage = 3.91496;
-posterior_initial_voltage = 1.8084;
+posterior_initial_voltage = 1.7839;
 frontal_loadcell_data.Force = ((frontal_loadcell_data.Data - frontal_initial_voltage)/0.0312)*9.8;
 posterior_loadcell_data.Force = ((posterior_loadcell_data.Data - posterior_initial_voltage)/0.0246)*9.8;
 

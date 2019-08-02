@@ -8,8 +8,8 @@ tilt1_controller:
     motor:
         id: 1
         #init: 2200
-        init: 1400        
-        min: 1400
+        init: 1600        
+        min: 1600
         max: 3000
 tilt2_controller:
     controller:
@@ -21,6 +21,6 @@ tilt2_controller:
     motor:
         id: 2
         #init: 2800
-        init: 3600
+        init: 3460
         min: 2000
-        max: 3600
+        max: 3460

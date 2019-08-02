@@ -1,7 +1,7 @@
 function [motor_states_frontal, motor_states_posterior, load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag)
 %function [load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag)
 
-%     %Dynamixel Motors
+    %Dynamixel Motors
     frontal_dynamixel_status_topic = select(bag,'Topic','/motor_states/frontal_tilt_port');
     frontal_dynamixel_status_msgs = readMessages(frontal_dynamixel_status_topic,'DataFormat','struct');
     posterior_dynamixel_status_topic = select(bag,'Topic','/motor_states/posterior_tilt_port');
@@ -13,7 +13,7 @@ function [motor_states_frontal, motor_states_posterior, load_data, frontal_loadc
     cat_data = cat(1,posterior_dynamixel_status_msgs{:,1});
     motor_states_posterior = cat(1,cat_data(:).MotorStates);
     motor_states_posterior = struct2table(rmfield(motor_states_posterior, 'MessageType'));
-    clear cat_data; }
+    clear cat_data; 
 
     %Torque Sensor
     load_data_topic = select(bag,'Topic','/load_data');
