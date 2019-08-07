@@ -17,7 +17,7 @@ class LoadCellSensor(object):
         self.pub_posterior = rospy.Publisher("posterior_loadcell_data", Float64, queue_size = 1, latch = False)
         ''' Node Configuration '''
         rospy.init_node('loadcell_sensor', anonymous = True)
-        self.fs = 200
+        self.fs = 1000
 
     def read_data(self):
         voltage1 = 0
@@ -29,7 +29,7 @@ class LoadCellSensor(object):
             #print(voltage1,voltage2)
         except:
             rospy.logwarn("Data not received")
-        
+
         return (voltage1,voltage2)
 
 

@@ -5,7 +5,9 @@ motor_characteristics = ReadYaml('../../yaml/tilt.yaml');
 %% Read Trials
 %trials_dir = '../tflex_trials/pretension20N/pretension.bag';
 %trials_dir = '../tflex_trials/tension20N/step_response1.bag';
-trials_dir = '../tflex_trials/test_posterior.bag';
+%trials_dir = '../tflex_trials/Pretension20N_F_P/step_response.bag';
+%trials_dir = '../tflex_trials/Pretension20N_F_P/shirp_signal_response_same_direction.bag';
+trials_dir = '../tflex_trials/test_posterior_loadcell.bag';
 bag = rosbag(trials_dir);
 
 
@@ -40,16 +42,20 @@ tilt1_command_data.Angle = tilt1_command_data.Data*180/pi;
 tilt2_command_data.Angle = tilt2_command_data.Data*180/pi;
 
 %% Loadcell Characteristics
-frontal_initial_voltage = 3.91496;
-posterior_initial_voltage = 1.7839;
+frontal_initial_voltage = 3.88563;
+posterior_initial_voltage = 1.8337;
 frontal_loadcell_data.Force = ((frontal_loadcell_data.Data - frontal_initial_voltage)/0.0312)*9.8;
 posterior_loadcell_data.Force = ((posterior_loadcell_data.Data - posterior_initial_voltage)/0.0246)*9.8;
 
 %Tendon Force
-frontal_inclination = deg2rad(87);
+frontal_inclination = deg2rad(83);
 frontal_loadcell_data.Tendon_Force = frontal_loadcell_data.Force/sin(frontal_inclination);
-posterior_inclination = deg2rad(69);
+posterior_inclination = deg2rad(72);
 posterior_loadcell_data.Tendon_Force = posterior_loadcell_data.Force/sin(posterior_inclination);
+
+posterior_filtered = lowpass(posterior_loadcell_data.Data,0.001,length(posterior_loadcell_data.Data)/(bag.EndTime - bag.StartTime));
+figure(4)
+plot(posterior_loadcell_data.Timestamp,posterior_filtered);
 
 %% Plots
 %Goal vs Present Position
