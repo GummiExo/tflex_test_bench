@@ -32,8 +32,9 @@ class Controller(object):
         print(len(self.chirp_signal))
 
     def sin_signal(self):
-        self.pub_cmd_motor1.publish(self.sin[self.i])
-        self.pub_singal_norm_motor1.publish(552*self.sin[self.i] + 3295)
+        factor_motor1 = 0.8
+        self.pub_cmd_motor1.publish(-factor_motor1*self.sin[self.i])
+        self.pub_singal_norm_motor1.publish(self.sin[self.i] + 3295)
         self.i+=1
         if self.i == len(self.sin):
             self.i = 0
@@ -50,7 +51,7 @@ class Controller(object):
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
-        factor_motor1 = 0.6
+        factor_motor1 = 0.8
         self.pub_cmd_motor1.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
         self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]-factor_motor1)
         print(self.chirp_signal[self.i])
@@ -67,16 +68,16 @@ def main():
     i = 0
     while not (rospy.is_shutdown()):
         #c.sin_signal()
-        c.chirp_publisher()
-        rate.sleep()
-        if c.i == 0:
-            break
-        # c.step_signal()
-        # i= i+1
-        # if (i == 10):
-        #     c.pub_cmd_motor1.publish(0)
-        #     c.pub_cmd_motor2.publish(0)
-        #     break;
+        # c.chirp_publisher()
+        # rate.sleep()
+        # if c.i == 0:
+        #     break
+        c.step_signal()
+        i= i+1
+        if (i == 10):
+            c.pub_cmd_motor1.publish(0)
+            c.pub_cmd_motor2.publish(0)
+            break;
     rospy.loginfo("Synchronization Finished")
 
 if __name__ == '__main__':

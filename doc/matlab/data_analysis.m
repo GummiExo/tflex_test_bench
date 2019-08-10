@@ -7,7 +7,8 @@ motor_characteristics = ReadYaml('../../yaml/tilt.yaml');
 %trials_dir = '../tflex_trials/tension20N/step_response1.bag';
 %trials_dir = '../tflex_trials/Pretension20N_F_P/step_response.bag';
 %trials_dir = '../tflex_trials/Pretension20N_F_P/shirp_signal_response_same_direction.bag';
-trials_dir = '../tflex_trials/test_posterior_loadcell.bag';
+trials_dir = '../tflex_trials/fail_trials/test_20N_0N.bag';
+%trials_dir = '../tflex_trials/test_posterior_loadcell.bag';
 bag = rosbag(trials_dir);
 
 
@@ -67,6 +68,7 @@ figure(1);
 figure(2)
     plot(frontal_loadcell_data.Tendon_Force); hold on;
     plot(posterior_loadcell_data.Tendon_Force);
+    legend('Frontal','Posterior')
 
 %Torque Sensor
 figure(3)
