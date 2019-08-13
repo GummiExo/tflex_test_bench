@@ -20,29 +20,28 @@ class Controller(object):
         self.pub_singal_norm_motor1 = rospy.Publisher("/goal_position_motor1", Int16, queue_size = 1, latch = False)
         self.t = [i*0.01 for i in range(12000)]
         self.sin = []
+        f_sin = 1 #Hz
         for i in range(len(self.t)):
-            self.sin.append(0.35*math.pi*math.sin(0.5*2*math.pi*self.t[i]))
+            self.sin.append(math.sin(f_sin*2*math.pi*self.t[i]))
         self.i = 0
         self.unit_rad = 2*math.pi/4095
         ''' Chirp Signal '''
         f0 = 0
-        f1 = 30
-        t1 = 60
+        f1 = 10
+        t1 = 30
         self.chirp_signal = scipy.signal.chirp(self.t, f0, t1, f1, method='linear', phi=0, vertex_zero=True)
-        print(len(self.chirp_signal))
 
     def sin_signal(self):
-        factor_motor1 = 0.8
-        self.pub_cmd_motor1.publish(-factor_motor1*self.sin[self.i])
-        self.pub_singal_norm_motor1.publish(self.sin[self.i] + 3295)
+        factor_motor = 0.5
+        self.pub_cmd_motor1.publish(-factor_motor*self.sin[self.i] + factor_motor)
+        #self.pub_singal_norm_motor1.publish(self.sin[self.i] + 3295)
         self.i+=1
         if self.i == len(self.sin):
             self.i = 0
 
     def step_signal(self):
         f = 1.0
-        #max_range = 0.3068
-        max_range = 0.5
+        max_range = 0.8
         self.pub_cmd_motor1.publish(max_range)
         self.pub_cmd_motor2.publish(0)
         time.sleep(1/f) # Period
@@ -51,9 +50,9 @@ class Controller(object):
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
-        factor_motor1 = 0.8
+        factor_motor1 = 0.5
         self.pub_cmd_motor1.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
-        self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]-factor_motor1)
+        self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
         print(self.chirp_signal[self.i])
         self.i+=1
         if self.i == len(self.chirp_signal):
@@ -67,17 +66,21 @@ def main():
     time.sleep(1)
     i = 0
     while not (rospy.is_shutdown()):
-        #c.sin_signal()
-        # c.chirp_publisher()
+        ''' Sin Signal '''
+        # c.sin_signal()
         # rate.sleep()
-        # if c.i == 0:
-        #     break
-        c.step_signal()
-        i= i+1
-        if (i == 10):
-            c.pub_cmd_motor1.publish(0)
-            c.pub_cmd_motor2.publish(0)
-            break;
+        ''' Chirp Signal '''
+        c.chirp_publisher()
+        rate.sleep()
+        if c.i == 0:
+            break
+        ''' Step Signal '''
+        # c.step_signal()
+        # i= i+1
+        # if (i == 10):
+        #     c.pub_cmd_motor1.publish(0)
+        #     c.pub_cmd_motor2.publish(0)
+        #     break;
     rospy.loginfo("Synchronization Finished")
 
 if __name__ == '__main__':

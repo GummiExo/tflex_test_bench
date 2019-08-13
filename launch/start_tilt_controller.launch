@@ -1,0 +1,16 @@
+<!-- -*- mode: XML -*- -->
+
+<launch>
+    <!-- Start tilt joint controller -->
+    <rosparam file="$(find tflex_test_bench)/yaml/tilt.yaml" command="load"/>
+    <node name="tilt_controller_spawner_frontal" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=frontal_motor
+                --port frontal_tilt_port
+                tilt1_controller"
+                output="screen"/>
+    <node name="tilt_controller_spawner_posterior" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=posterior_motor
+                --port posterior_tilt_port
+                tilt2_controller"
+                output="screen"/>
+</launch>
