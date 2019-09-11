@@ -9,10 +9,10 @@ from std_msgs.msg import Float64
 class LoadSensor(object):
     def __init__(self):
         '''Parameters Inicialization '''
-        self.serial_port = rospy.get_param("port","/dev/ttyUSB2")
+        self.serial_port = rospy.get_param("port","/dev/ttyUSB0")
         os.system("sudo chmod 777 " + self.serial_port) #Enabling port permissions
         self.port_parameters = {
-                                 "br": rospy.get_param("baud_rate", 9600),
+                                 "br": rospy.get_param("baud_rate", 57200),
                                  "bs": rospy.get_param("byte_size", 8),
                                  "p": rospy.get_param("parity", 'E'),
                                  "sb": rospy.get_param("stop_bits", 1),
@@ -34,7 +34,7 @@ class LoadSensor(object):
         self.pub = rospy.Publisher("load_data", Float64, queue_size = 1, latch = False)
         ''' Node Configuration '''
         rospy.init_node('load_sensor', anonymous = True)
-        self.fs = 100
+        self.fs = 300
 
     def read_data(self):
         try:

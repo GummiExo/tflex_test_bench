@@ -51,8 +51,8 @@ c_fig = figure;
 plot(frontal_filtered)
 title('Frontal')
 ylabel('Voltage')
-test_voltage_frontal = zeros(1,13);
-for i = 1:13
+test_voltage_frontal = zeros(1,7);
+for i = 1:7
     fprintf('Select position 1 and press enter then select position 2 and press enter \n')
     cursor = datacursormode(c_fig);
     pause
@@ -99,18 +99,18 @@ end
 
 %% Function
 
-m = [0 2.823 2.818 2.829 2.855 3.140 3.084];
-F_total_frontal = zeros(1,7);
+m = [0 3.085 3.142 3.075];
+F_total_frontal = zeros(1,4);
 for i = 2:length(m)
    F_total_frontal(i) = F_total_frontal(i-1) + (m(i))*9.8;
 end
-p = polyfit(F_total_frontal,test_voltage_frontal(1:7),1);
-r = corrcoef(F_total_frontal,test_voltage_frontal(1:7));
+p = polyfit(F_total_frontal,test_voltage_frontal(1:4),1);
+r = corrcoef(F_total_frontal,test_voltage_frontal(1:4));
 r(1,2)
 fprintf('V_frontal = %s F_d + %s\n',p(1),p(2));
 
 
-m2 = [0 3.140 3.084 3.075];
+m2 = [0 3.085 3.142 3.075];
 F_total_posterior = zeros(1,4);
 for i = 2:length(m2)
    F_total_posterior(i) = F_total_posterior(i-1) + (m2(i))*9.8;

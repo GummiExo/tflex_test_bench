@@ -40,8 +40,8 @@ class Controller(object):
             self.i = 0
 
     def step_signal(self):
-        f = 1.0
-        max_range = 0.8
+        f = 0.8
+        max_range = -1.5
         self.pub_cmd_motor1.publish(max_range)
         self.pub_cmd_motor2.publish(0)
         time.sleep(1/f) # Period
@@ -50,9 +50,9 @@ class Controller(object):
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
-        factor_motor1 = 0.5
+        factor_motor1 = 0.1
         self.pub_cmd_motor1.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
-        self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
+        self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]-factor_motor1)
         print(self.chirp_signal[self.i])
         self.i+=1
         if self.i == len(self.chirp_signal):
@@ -77,7 +77,7 @@ def main():
         ''' Step Signal '''
         # c.step_signal()
         # i= i+1
-        # if (i == 10):
+        # if (i == 25):
         #     c.pub_cmd_motor1.publish(0)
         #     c.pub_cmd_motor2.publish(0)
         #     break;

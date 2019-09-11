@@ -7,13 +7,13 @@
             serial_ports:
                 frontal_tilt_port:
                     port_name: "/dev/ttyUSB0"
-                    baud_rate: 1000000
+                    baud_rate: 3000000
                     min_motor_id: 1
-                    max_motor_id: 1
+                    max_motor_id: 2
                     update_rate: 1000
         </rosparam>
     </node >
-    <node name="dynamixel_manager_posterior" pkg="dynamixel_controllers" type="controller_manager.py" required="true" output="screen">
+    <!-- <node name="dynamixel_manager_posterior" pkg="dynamixel_controllers" type="controller_manager.py" required="true" output="screen">
         <rosparam>
             namespace: posterior_motor
             serial_ports:
@@ -24,5 +24,5 @@
                     max_motor_id: 2
                     update_rate: 1000
         </rosparam>
-    </node>
+    </node> -->
 </launch>

@@ -4,8 +4,10 @@ motor_characteristics = ReadYaml('../../yaml/tilt.yaml');
 
 %% Read Trials
 %trials_dir = '../tflex_trials/initial_state.bag';
-%trials_dir = '../tflex_trials/equal_pretension/20N/step_response.bag';
-trials_dir = '../tflex_trials/equal_pretension/80N/chirp_response_same_direction.bag';
+%trials_dir = '../tflex_trials/equal_pretension/80N/chirp_response_opposite_direction.bag';
+%trials_dir = '../tflex_trials/equal_pretension/80N/chirp_response_same_direction.bag';
+trials_dir = '/home/tflex-pc/Documents/Bags T-FLEX/V3.0/therapy.bag'
+
 bag = rosbag(trials_dir);
 
 
@@ -23,7 +25,7 @@ tilt1_command_data.Timestamp = tilt1_command_data.Timestamp - bag.StartTime;
 tilt2_command_data.Timestamp = tilt2_command_data.Timestamp - bag.StartTime;
 
 
-%% Motor Characteristics
+%% Motor Characterishttps://hetpro-store.com/TUTORIALES/mosfet-switch/tics
 
 %Position to Degrees
 motor_states_frontal.Present_Angle = (double(motor_states_frontal.Position) - double(motor_characteristics.tilt1_controller.motor.init))*360.0/4095.0;
@@ -62,21 +64,26 @@ frontal_loadcell_data.Tendon_Force = frontal_loadcell_data.Force/sin(frontal_inc
 posterior_inclination = deg2rad(82);
 posterior_loadcell_data.Tendon_Force = posterior_loadcell_data.Force/sin(posterior_inclination);
 
-%% Plots
-%Goal vs Present Position
-figure(1); 
-    subplot(1,2,1); plot(motor_states_frontal.Timestamp, motor_states_frontal.Goal_Angle); hold on; plot(motor_states_frontal.Timestamp, motor_states_frontal.Present_Angle);
-    subplot(1,2,2); plot(motor_states_posterior.Timestamp, motor_states_posterior.Goal_Angle); hold on; plot(motor_states_posterior.Timestamp, motor_states_posterior.Present_Angle);
+%% Data processing
 
-%Force Tendon
-figure(2)
-    plot(frontal_loadcell_data.Tendon_Force); hold on;
-    plot(posterior_loadcell_data.Tendon_Force);
-    legend('Frontal','Posterior')
+load_data.filtered = medfilt1(load_data.Data);
 
-%Torque Sensor
-figure(3)
-    subplot(2,1,1); plot(load_data.Timestamp,load_data.Data);
-     subplot(2,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage); hold on;
-                     plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage);
+
+% %% Plots
+% %Goal vs Present Position
+% figure(1); 
+%     subplot(1,2,1); plot(motor_states_frontal.Timestamp, motor_states_frontal.Goal_Angle); hold on; plot(motor_states_frontal.Timestamp, motor_states_frontal.Present_Angle);
+%     subplot(1,2,2); plot(motor_states_posterior.Timestamp, motor_states_posterior.Goal_Angle); hold on; plot(motor_states_posterior.Timestamp, motor_states_posterior.Present_Angle);
+% 
+% %Force Tendon
+% figure(2)
+%     plot(frontal_loadcell_data.Tendon_Force); hold on;
+%     plot(posterior_loadcell_data.Tendon_Force);
+%     legend('Frontal','Posterior')
+% 
+% %Torque Sensor
+% figure(3)
+%     subplot(2,1,1); plot(load_data.Timestamp,load_data.filtered);
+%      subplot(2,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage); hold on;
+%                      plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage);
     

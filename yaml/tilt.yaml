@@ -7,7 +7,7 @@ tilt1_controller:
     joint_speed: 10.0
     motor:
         id: 1
-        init: 1600        
+        init: 1600      
         min: 1600
         max: 3000
 tilt2_controller:
@@ -22,3 +22,6 @@ tilt2_controller:
         init: 3400
         min: 2000
         max: 3400
+        #init: 1000
+        #min: 1000
+        #max: 2400
