@@ -9,7 +9,7 @@ from std_msgs.msg import Float64
 class LoadSensor(object):
     def __init__(self):
         '''Parameters Inicialization '''
-        self.serial_port = rospy.get_param("port","/dev/ttyUSB0")
+        self.serial_port = rospy.get_param("port","/dev/ttyUSB2")
         os.system("sudo chmod 777 " + self.serial_port) #Enabling port permissions
         self.port_parameters = {
                                  "br": rospy.get_param("baud_rate", 57200),

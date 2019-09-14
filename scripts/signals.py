@@ -41,7 +41,7 @@ class Controller(object):
 
     def step_signal(self):
         f = 0.8
-        max_range = -1.5
+        max_range = 0.5
         self.pub_cmd_motor1.publish(max_range)
         self.pub_cmd_motor2.publish(0)
         time.sleep(1/f) # Period
@@ -50,7 +50,7 @@ class Controller(object):
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
-        factor_motor1 = 0.1
+        factor_motor1 = 0.5
         self.pub_cmd_motor1.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
         self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]-factor_motor1)
         print(self.chirp_signal[self.i])
@@ -70,17 +70,17 @@ def main():
         # c.sin_signal()
         # rate.sleep()
         ''' Chirp Signal '''
-        c.chirp_publisher()
-        rate.sleep()
-        if c.i == 0:
-            break
+        # c.chirp_publisher()
+        # rate.sleep()
+        # if c.i == 0:
+        #    break
         ''' Step Signal '''
-        # c.step_signal()
-        # i= i+1
-        # if (i == 25):
-        #     c.pub_cmd_motor1.publish(0)
-        #     c.pub_cmd_motor2.publish(0)
-        #     break;
+        c.step_signal()
+        i= i+1
+        if (i == 15):
+            c.pub_cmd_motor1.publish(0)
+            c.pub_cmd_motor2.publish(0)
+            break;
     rospy.loginfo("Synchronization Finished")
 
 if __name__ == '__main__':

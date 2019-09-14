@@ -42,9 +42,12 @@ len_posterior = length(posterior_loadcell_data.Data);
 posterior_loadcell_data.Timestamp = posterior_loadcell_data.Timestamp - bag_posterior.StartTime;
 
 %% Filters
-frontal_filtered = lowpass(frontal_loadcell_data.Data,0.001,len_frontal/(frontal_loadcell_data.Timestamp(len_frontal) - frontal_loadcell_data.Timestamp(1)));
-posterior_filtered = lowpass(posterior_loadcell_data.Data,0.001,len_posterior/(posterior_loadcell_data.Timestamp(len_posterior) - posterior_loadcell_data.Timestamp(1)));
+%frontal_filtered = lowpass(frontal_loadcell_data.Data,0.001,len_frontal/(frontal_loadcell_data.Timestamp(len_frontal) - frontal_loadcell_data.Timestamp(1)));
+%posterior_filtered = lowpass(posterior_loadcell_data.Data,0.001,len_posterior/(posterior_loadcell_data.Timestamp(len_posterior) - posterior_loadcell_data.Timestamp(1)));
 
+%% Without Filter
+frontal_filtered = frontal_loadcell_data.Data;
+posterior_filtered = posterior_loadcell_data.Data;
 %% Select Data Frontal
 
 c_fig = figure;
@@ -74,7 +77,8 @@ end
 %% Select Data Posterior
 
 c2_fig = figure;
-plot(posterior_filtered)
+%plot(posterior_filtered)
+plot(posterior_loadcell_data.Data)
 title('Posterior')
 ylabel('Voltage')
 test_voltage_posterior = zeros(1,7);
@@ -97,9 +101,9 @@ for i = 1:7
 
 end
 
-%% Function
+%% Function Frontal
 
-m = [0 3.085 3.142 3.075];
+m = [0.04 3.075 3.085 3.142];
 F_total_frontal = zeros(1,4);
 for i = 2:length(m)
    F_total_frontal(i) = F_total_frontal(i-1) + (m(i))*9.8;
@@ -109,8 +113,8 @@ r = corrcoef(F_total_frontal,test_voltage_frontal(1:4));
 r(1,2)
 fprintf('V_frontal = %s F_d + %s\n',p(1),p(2));
 
-
-m2 = [0 3.085 3.142 3.075];
+%% Function Posterior
+m2 = [0.04 3.075 3.085 3.142];
 F_total_posterior = zeros(1,4);
 for i = 2:length(m2)
    F_total_posterior(i) = F_total_posterior(i-1) + (m2(i))*9.8;
