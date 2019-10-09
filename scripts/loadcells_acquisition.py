@@ -5,7 +5,7 @@ import os
 import random
 import rospy
 import numpy
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64,Int16
 from scipy.signal import butter
 
 class LoadCellSensor(object):
@@ -23,40 +23,49 @@ class LoadCellSensor(object):
         rospy.init_node('loadcell_sensor', anonymous = True)
         self.fs = 1000
         ''' Loadcell Configuration '''
-        self.m1 = 664.6   #Posterior
-        self.m2 = 691.3322    #Frontal
+        self.m1 = 2756.88   #Posterior
+        self.m2 = 349.87    #Frontal
         self.vo1 = 0
         self.vo2 = 0
 
     def initial_value(self):
         ''' Calculating Initial Values '''
         n = 0
-        mean_value1 = []
-        mean_value2 = []
-        while n<=100:
-            value1,value2 = self.read_data();
-            mean_value1 = numpy.append(mean_value1, value1)
-            mean_value2 = numpy.append(mean_value2, value2)
+        mean_value_posterior = []
+        mean_value_frontal = []
+        while n<=200:
+            value_posterior,value_frontal = self.read_data();
+            if value_posterior != 0.0:
+                mean_value_posterior = numpy.append(mean_value_posterior, value_posterior)
+            if value_frontal != 0.0:
+                mean_value_frontal = numpy.append(mean_value_frontal, value_frontal)
             n += 1
-        print(mean_value1[-50::])
-        self.vo1 = numpy.mean(mean_value1[-50::], axis=0, dtype=numpy.float64)
-        self.vo2 = numpy.mean(mean_value2[-100::], axis=0)
+        print("Frontal")
+        print(mean_value_frontal)
+        print("Posterior")
+        print(mean_value_posterior)
+        self.vo1 = numpy.mean(mean_value_posterior, axis=0, dtype=numpy.float64)
+        self.vo2 = numpy.mean(mean_value_frontal[-50::], axis=0, dtype=numpy.float64)
         rospy.loginfo("Initial Value Frontal: %s",self.vo2)
         rospy.loginfo("Initial Value Posterior: %s",self.vo1)
 
     def read_data(self):
-        value1 = 0
-        value2 = 0
+        value_posterior = 0
+        value_frontal = 0
         try:
             data = self.ser.readline()
-            # print(data[19])
-            value2 = float(data[5:15])
-            #value1 = float(data)
-            value1 = float(data[20:30])
-            #value2 = float(data[8:15])
+            pos_data = data.find('\t')
+            # print(data[0:6])
+            # print(data[11:17])
+            if pos_data == 10:
+                pos_frontal = 3
+            else:
+                pos_frontal = 0
+            value_frontal = float(data[pos_frontal:pos_data-1])
+            value_posterior = float(data[pos_data::])
         except:
             rospy.logwarn("Data not received")
-        return (value1,value2)
+        return (value_posterior,value_frontal)
 
     def force(self,value,m,vo):
         f = (value - vo)/m
@@ -69,13 +78,15 @@ def main():
     loadcell_sensor.initial_value()
     rospy.loginfo('Mining Data')
     while not rospy.is_shutdown():
-        value1,value2 = loadcell_sensor.read_data()
-        force1 = loadcell_sensor.force(value1,loadcell_sensor.m1,loadcell_sensor.vo1);
-        #force2 = loadcell_sensor.force(value2,loadcell_sensor.m2,loadcell_sensor.vo2)
-        loadcell_sensor.pub_posterior.publish(value1)
-        loadcell_sensor.pub_frontal.publish(value2)
-        loadcell_sensor.pub_posterior_force.publish(force1)
-        #loadcell_sensor.pub_frontal_force.publish(force2)
+        value_posterior,value_frontal = loadcell_sensor.read_data()
+        force1 = loadcell_sensor.force(value_posterior,loadcell_sensor.m1,loadcell_sensor.vo1);
+        force2 = loadcell_sensor.force(value_frontal,loadcell_sensor.m2,loadcell_sensor.vo2)
+        if value_posterior != 0:
+            loadcell_sensor.pub_posterior.publish(value_posterior)
+            loadcell_sensor.pub_posterior_force.publish(force1)
+        if value_frontal != 0:
+            loadcell_sensor.pub_frontal.publish(value_frontal)
+            loadcell_sensor.pub_frontal_force.publish(force2)
         rate.sleep()
     loadcell_sensor.ser.close()
     rospy.loginfo('Closed Port')

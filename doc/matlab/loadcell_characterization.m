@@ -2,7 +2,7 @@ clear all; clc; close all;
 addpath('./src')
 
 %% Read Trials
-trials_dir_frontal = '../tflex_trials/loadcell_characterization/v3/frontal.bag';
+trials_dir_frontal = '../tflex_trials/loadcell_characterization/frontal.bag';
 bag_frontal = rosbag(trials_dir_frontal);
 trials_dir_posterior = '../tflex_trials/loadcell_characterization/posterior.bag';
 bag_posterior = rosbag(trials_dir_posterior);
