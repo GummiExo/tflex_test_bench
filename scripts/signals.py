@@ -45,16 +45,19 @@ class Controller(object):
         f = 1
         max_range = 0.25
         self.pub_cmd_motor1.publish(-max_range)
-        self.pub_cmd_motor2.publish(0)
+        self.pub_cmd_motor2.publish(max_range) #Stiffness
+        #self.pub_cmd_motor2.publish(0) #Flexion-Extension
         time.sleep(1/f) # Period
         self.pub_cmd_motor1.publish(0)
-        self.pub_cmd_motor2.publish(max_range)
+        self.pub_cmd_motor2.publish(0) #Stiffness
+        #self.pub_cmd_motor2.publish(max_range) #Flexion-Extension
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
         factor_motor1 = 0.25
         self.pub_cmd_motor1.publish(factor_motor1*self.chirp_signal[self.i]-factor_motor1)
-        self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]+factor_motor1)
+        self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1) #Stiffness
+        #self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]+factor_motor1) #Flexion-Extension
         print(self.chirp_signal[self.i])
         self.i+=1
         if self.i == len(self.chirp_signal):
@@ -72,17 +75,17 @@ def main():
         # c.sin_signal()
         # rate.sleep()
         ''' Chirp Signal '''
-        # c.chirp_publisher()
-        # rate.sleep()
-        # if c.i == 0:
-        #    break
+        c.chirp_publisher()
+        rate.sleep()
+        if c.i == 0:
+           break
         ''' Step Signal '''
-        c.step_signal()
-        i= i+1
-        if (i == 10):
-            c.pub_cmd_motor1.publish(0)
-            c.pub_cmd_motor2.publish(0)
-            break;
+        # c.step_signal()
+        # i= i+1
+        # if (i == 10):
+        #     c.pub_cmd_motor1.publish(0)
+        #     c.pub_cmd_motor2.publish(0)
+        #     break;
     rospy.loginfo("Synchronization Finished")
 
 if __name__ == '__main__':
