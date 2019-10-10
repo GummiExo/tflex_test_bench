@@ -1,4 +1,4 @@
-function [motor_states_frontal, motor_states_posterior, load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag)
+function [motor_states_frontal, motor_states_posterior, load_data, frontal_loadcell_data, posterior_loadcell_data, frontal_loadcell_force, posterior_loadcell_force, tilt1_command_data, tilt2_command_data] = read_topics(bag)
 %function [load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag)
 
     %Dynamixel Motors
@@ -51,6 +51,31 @@ function [motor_states_frontal, motor_states_posterior, load_data, frontal_loadc
     posterior_loadcell_data.Data = data.Data;
     clear cat_data data;
     posterior_loadcell_data = struct2table(cat(1,posterior_loadcell_data));
+    
+    frontal_loadcell_force_topic = select(bag,'Topic','/frontal_loadcell_force');
+    frontal_loadcell_force_msgs = readMessages(frontal_loadcell_force_topic,'DataFormat','struct');
+    posterior_loadcell_force_topic = select(bag,'Topic','/posterior_loadcell_force');
+    posterior_loadcell_force_msgs = readMessages(posterior_loadcell_force_topic,'DataFormat','struct');
+    cat_data = cat(1,frontal_loadcell_force_topic.MessageList{:,1});
+    frontal_loadcell_force.Timestamp = cat_data;
+    clear cat_data;
+    cat_data = cat(1,frontal_loadcell_force_msgs{:,1});
+    cat_data = rmfield(cat_data, 'MessageType');
+    data = struct2table(cat_data);
+    frontal_loadcell_force.Data = data.Data;
+    clear cat_data data;
+    frontal_loadcell_force = struct2table(cat(1,frontal_loadcell_force));
+    cat_data = cat(1,posterior_loadcell_force_topic.MessageList{:,1});
+    posterior_loadcell_force.Timestamp = cat_data;
+    clear cat_data;
+    cat_data = cat(1,posterior_loadcell_force_msgs{:,1});
+    cat_data = rmfield(cat_data, 'MessageType');
+    data = struct2table(cat_data);
+    posterior_loadcell_force.Data = data.Data;
+    clear cat_data data;
+    posterior_loadcell_force = struct2table(cat(1,posterior_loadcell_force));
+    
+    
 
     % Dynamixel Commands
     tilt1_command_topic = select(bag,'Topic','/tilt1_controller/command');

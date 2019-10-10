@@ -27,9 +27,11 @@ class Controller(object):
         self.unit_rad = 2*math.pi/4095
         ''' Chirp Signal '''
         f0 = 0
-        f1 = 10
-        t1 = 30
+        f1 = 5
+        t1 = 20
+        self.t = [i*0.01 for i in range(t1*100)]
         self.chirp_signal = scipy.signal.chirp(self.t, f0, t1, f1, method='linear', phi=0, vertex_zero=True)
+        print(len(self.chirp_signal))
 
     def sin_signal(self):
         factor_motor = 0.5
@@ -40,19 +42,19 @@ class Controller(object):
             self.i = 0
 
     def step_signal(self):
-        f = 0.8
-        max_range = 0.5
-        self.pub_cmd_motor1.publish(max_range)
+        f = 1
+        max_range = 0.25
+        self.pub_cmd_motor1.publish(-max_range)
         self.pub_cmd_motor2.publish(0)
         time.sleep(1/f) # Period
         self.pub_cmd_motor1.publish(0)
-        self.pub_cmd_motor2.publish(-max_range)
+        self.pub_cmd_motor2.publish(max_range)
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
-        factor_motor1 = 0.5
-        self.pub_cmd_motor1.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1)
-        self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]-factor_motor1)
+        factor_motor1 = 0.25
+        self.pub_cmd_motor1.publish(factor_motor1*self.chirp_signal[self.i]-factor_motor1)
+        self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]+factor_motor1)
         print(self.chirp_signal[self.i])
         self.i+=1
         if self.i == len(self.chirp_signal):
@@ -77,7 +79,7 @@ def main():
         ''' Step Signal '''
         c.step_signal()
         i= i+1
-        if (i == 15):
+        if (i == 10):
             c.pub_cmd_motor1.publish(0)
             c.pub_cmd_motor2.publish(0)
             break;

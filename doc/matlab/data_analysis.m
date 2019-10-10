@@ -8,12 +8,12 @@ motor_characteristics = ReadYaml('../../yaml/tilt.yaml');
 %trials_dir = '../tflex_trials/equal_pretension/80N/chirp_response_same_direction.bag';
 %trials_dir = '/home/tflex-pc/Documents/Bags T-FLEX/V3.0/therapy.bag'
 
-trials_dir = '../tflex_trials/icra2020/equal_pretension/low_pretension/step_response_2.bag';
+trials_dir = '../tflex_trials/step_response3.bag';
 bag = rosbag(trials_dir);
 
 
 %% Read Topics
-[motor_states_frontal, motor_states_posterior, load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag);
+[motor_states_frontal, motor_states_posterior, load_data, frontal_loadcell_data, posterior_loadcell_data, frontal_loadcell_force, posterior_loadcell_force, tilt1_command_data, tilt2_command_data] = read_topics(bag);
 %[load_data, frontal_loadcell_data, posterior_loadcell_data, tilt1_command_data, tilt2_command_data] = read_topics(bag);
 
 %Normalized Timestamp
@@ -26,7 +26,7 @@ tilt1_command_data.Timestamp = tilt1_command_data.Timestamp - bag.StartTime;
 tilt2_command_data.Timestamp = tilt2_command_data.Timestamp - bag.StartTime;
 
 
-%% Motor Characterishttps://hetpro-store.com/TUTORIALES/mosfet-switch/tics
+%% Motor Characteristics
 
 %Position to Degrees
 motor_states_frontal.Present_Angle = (double(motor_states_frontal.Position) - double(motor_characteristics.tilt1_controller.motor.init))*360.0/4095.0;
@@ -44,26 +44,30 @@ tilt2_command_data.Angle = tilt2_command_data.Data*180/pi;
 
 %% Loadcell Characteristics
 
-%Filters
-len_frontal = length(frontal_loadcell_data.Data);
-len_posterior = length(posterior_loadcell_data.Data);
-frontal_loadcell_data.filtered = lowpass(frontal_loadcell_data.Data,0.001,len_frontal/(frontal_loadcell_data.Timestamp(len_frontal) - frontal_loadcell_data.Timestamp(1)));
-posterior_loadcell_data.filtered = lowpass(posterior_loadcell_data.Data,0.001,len_posterior/(posterior_loadcell_data.Timestamp(len_posterior) - posterior_loadcell_data.Timestamp(1)));
-figure(4)
-plot(frontal_loadcell_data.Timestamp, frontal_loadcell_data.filtered); hold on; plot(posterior_loadcell_data.Timestamp,posterior_loadcell_data.filtered); legend('Frontal','Posterior'); title('Loadcell Data Filtered');
+% %Filters
+% len_frontal = length(frontal_loadcell_data.Data);
+% len_posterior = length(posterior_loadcell_data.Data);
+% frontal_loadcell_data.filtered = lowpass(frontal_loadcell_data.Data,0.001,len_frontal/(frontal_loadcell_data.Timestamp(len_frontal) - frontal_loadcell_data.Timestamp(1)));
+% posterior_loadcell_data.filtered = lowpass(posterior_loadcell_data.Data,0.001,len_posterior/(posterior_loadcell_data.Timestamp(len_posterior) - posterior_loadcell_data.Timestamp(1)));
+% figure(4)
+% plot(frontal_loadcell_data.Timestamp, frontal_loadcell_data.filtered); hold on; plot(posterior_loadcell_data.Timestamp,posterior_loadcell_data.filtered); legend('Frontal','Posterior'); title('Loadcell Data Filtered');
+% 
+% frontal_initial_voltage = 3.421;
+% factor_frontal = 0.0003329729;
+% posterior_initial_voltage = 1.802;
+% factor_posterior = 0.0006506158;
+% frontal_loadcell_data.Force = ((frontal_loadcell_data.filtered - frontal_initial_voltage)/factor_frontal);
+% posterior_loadcell_data.Force = ((posterior_loadcell_data.filtered - posterior_initial_voltage)/factor_posterior);
+% 
+% %Tendon Force
+% frontal_inclination = deg2rad(97);
+% frontal_loadcell_data.Tendon_Force = frontal_loadcell_data.Force/sin(frontal_inclination);
+% posterior_inclination = deg2rad(82);
+% posterior_loadcell_data.Tendon_Force = posterior_loadcell_data.Force/sin(posterior_inclination);
 
-frontal_initial_voltage = 3.421;
-factor_frontal = 0.0003329729;
-posterior_initial_voltage = 1.802;
-factor_posterior = 0.0006506158;
-frontal_loadcell_data.Force = ((frontal_loadcell_data.filtered - frontal_initial_voltage)/factor_frontal);
-posterior_loadcell_data.Force = ((posterior_loadcell_data.filtered - posterior_initial_voltage)/factor_posterior);
+%figure(4)
+%plot(frontal_loadcell_force.Timestamp, frontal_loadcell_force.Data); hold on; plot(posterior_loadcell_force.Timestamp,posterior_loadcell_force.Data); legend('Frontal','Posterior'); title('Loadcell Force');
 
-%Tendon Force
-frontal_inclination = deg2rad(97);
-frontal_loadcell_data.Tendon_Force = frontal_loadcell_data.Force/sin(frontal_inclination);
-posterior_inclination = deg2rad(82);
-posterior_loadcell_data.Tendon_Force = posterior_loadcell_data.Force/sin(posterior_inclination);
 
 %% Data processing
 
@@ -78,13 +82,14 @@ figure(1);
 
 %Force Tendon
 figure(2)
-    plot(frontal_loadcell_data.Tendon_Force); hold on;
-    plot(posterior_loadcell_data.Tendon_Force);
-    legend('Frontal','Posterior')
+    plot(frontal_loadcell_force.Timestamp,frontal_loadcell_force.Data); hold on;
+    plot(posterior_loadcell_force.Timestamp,posterior_loadcell_force.Data);
+    legend('Frontal','Posterior');
 
 %Torque Sensor
 figure(3)
     subplot(2,1,1); plot(load_data.Timestamp,load_data.filtered);
-     subplot(2,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage); hold on;
-                     plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage);
+    subplot(2,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage); hold on;
+                    plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage);
+                    legend('Frontal','Posterior')
     
