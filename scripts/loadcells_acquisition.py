@@ -44,7 +44,7 @@ class LoadCellSensor(object):
         print(mean_value_frontal)
         print("Posterior")
         print(mean_value_posterior)
-        self.vo1 = numpy.mean(mean_value_posterior, axis=0, dtype=numpy.float64)
+        self.vo1 = numpy.mean(mean_value_posterior[0:10], axis=0, dtype=numpy.float64)
         self.vo2 = numpy.mean(mean_value_frontal[-50::], axis=0, dtype=numpy.float64)
         rospy.loginfo("Initial Value Frontal: %s",self.vo2)
         rospy.loginfo("Initial Value Posterior: %s",self.vo1)

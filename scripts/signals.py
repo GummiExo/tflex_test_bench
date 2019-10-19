@@ -27,11 +27,11 @@ class Controller(object):
         self.unit_rad = 2*math.pi/4095
         ''' Chirp Signal '''
         f0 = 0
-        f1 = 5
-        t1 = 20
+        f1 = 10
+        t1 = 30
         self.t = [i*0.01 for i in range(t1*100)]
         self.chirp_signal = scipy.signal.chirp(self.t, f0, t1, f1, method='linear', phi=0, vertex_zero=True)
-        print(len(self.chirp_signal))
+        #print(len(self.chirp_signal))
 
     def sin_signal(self):
         factor_motor = 0.5
@@ -45,18 +45,18 @@ class Controller(object):
         f = 1
         max_range = 0.25
         self.pub_cmd_motor1.publish(-max_range)
-        # self.pub_cmd_motor2.publish(max_range) #Stiffness
+        #self.pub_cmd_motor2.publish(max_range) #Stiffness
         self.pub_cmd_motor2.publish(0) #Flexion-Extension
         time.sleep(1/f) # Period
         self.pub_cmd_motor1.publish(0)
-        # self.pub_cmd_motor2.publish(0) #Stiffness
+        #self.pub_cmd_motor2.publish(0) #Stiffness
         self.pub_cmd_motor2.publish(max_range) #Flexion-Extension
         time.sleep(1/f) # Period
 
     def chirp_publisher(self):
         factor_motor1 = 0.25
         self.pub_cmd_motor1.publish(factor_motor1*self.chirp_signal[self.i]-factor_motor1)
-        # self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1) #Stiffness
+        #self.pub_cmd_motor2.publish(-factor_motor1*self.chirp_signal[self.i]+factor_motor1) #Stiffness
         self.pub_cmd_motor2.publish(factor_motor1*self.chirp_signal[self.i]+factor_motor1) #Flexion-Extension
         print(self.chirp_signal[self.i])
         self.i+=1
@@ -67,6 +67,8 @@ class Controller(object):
 def main():
 
     c = Controller()
+    trial = 0 # Step Response
+    trial = 1 # Chirp Response
     rate = rospy.Rate(100)
     time.sleep(1)
     i = 0
@@ -74,16 +76,18 @@ def main():
         ''' Sin Signal '''
         # c.sin_signal()
         # rate.sleep()
-        ''' Chirp Signal '''
-        c.chirp_publisher()
-        rate.sleep()
-        if c.i == 0:
-           break
-        ''' Step Signal '''
-        # c.step_signal()
-        # i= i+1
-        # if (i == 10):
-        #     break;
+        if trial == 0:
+            ''' Step Signal '''
+            c.step_signal()
+            i= i+1
+            if (i == 10):
+                break;
+        if trial == 1:
+            ''' Chirp Signal '''
+            c.chirp_publisher()
+            rate.sleep()
+            if c.i == 0:
+               break
     c.pub_cmd_motor1.publish(0)
     c.pub_cmd_motor2.publish(0)
     rospy.loginfo("Synchronization Finished")
