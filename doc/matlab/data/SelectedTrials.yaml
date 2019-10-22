@@ -1,0 +1,30 @@
+step_response:
+    Rigid_and_Tendons_FlexExte_Equal_Pretension: 
+        10N : 3
+        20N : 2
+        5N: 1
+
+    Tendons_FlexExte_Equal_Pretension: 
+        10N : 3
+        20N : 2
+        5N : 1
+
+    Tendons_Stiffness_Equal_Pretension: 
+        10N : 3 
+        20N : 2
+        5N : 2
+chirp_response:
+    Rigid_and_Tendons_FlexExte_Equal_Pretension: 
+        10N : 3
+        20N : 2
+        5N: 1
+
+    Tendons_FlexExte_Equal_Pretension: 
+        10N : 3
+        20N : 3
+        5N : 2
+
+    Tendons_Stiffness_Equal_Pretension: 
+        10N : 2 
+        20N : 3
+        5N : 2
