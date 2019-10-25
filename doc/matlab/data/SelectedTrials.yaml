@@ -7,7 +7,7 @@ step_response:
     Tendons_FlexExte_Equal_Pretension: 
         10N : 3
         20N : 2
-        5N : 1
+        5N : 3
 
     Tendons_Stiffness_Equal_Pretension: 
         10N : 3 

@@ -1,4 +1,5 @@
 clear all; close all; clc; 
+addpath('src/');
 load('data/selected_trials.mat');
 
 %% Step Response Flexo-Extension movements
@@ -610,3 +611,4 @@ for i = 1:length(step_response)
     R{i,1}= corrcoef(xt,yt); 
     
 end
+
