@@ -1,9 +1,11 @@
-function res = data_analysis(trials_dir)
-        %trials_dir = '../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/step_response.bag';
+%function res = data_analysis(trials_dir)
+        
         clearvars -except trials_dir
-    %try
-        motor_characteristics = ReadYaml('../../../../yaml/tilt.yaml');
 
+        %motor_characteristics = ReadYaml('../../../../yaml/tilt.yaml');
+        motor_characteristics = ReadYaml('../../yaml/tilt.yaml'); %Executing code directly
+        trials_dir = '../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/step_response.bag';
+        
         %% Read Trials
 
         bag = rosbag(trials_dir);
@@ -93,100 +95,114 @@ function res = data_analysis(trials_dir)
         peaks.value(1) = [];
         peaks.position(1) = [];
         peaks.time = motor_states_frontal.TimestampSync(peaks.position);
+        factor_seconds = 0.05;
 
-        %figure;
-        %subplot(2,1,1); plot(motor_states_frontal.TimestampSync,-motor_states_frontal.Goal_Angle); hold on; plot(peaks.time,peaks.value,'*');
-        %subplot(2,1,2); plot(load_data.TimestampSync,load_data.Data); hold on; plot(peaks.time,peaks.value,'*');
+%         figure;
+%         subplot(2,1,1); plot(motor_states_frontal.TimestampSync,-motor_states_frontal.Goal_Angle); hold on; plot(peaks.time,peaks.value,'*');
+%                         plot(motor_states_frontal.TimestampSync,-motor_states_frontal.Present_Angle);
+%         subplot(2,1,2); plot(load_data.TimestampSync,load_data.Data); hold on; plot(peaks.time,peaks.value,'*');
+%         
+        
+        %%% Find Position of Peaks
+        for i = 2:length(peaks.position)
+            %%%% Frontal Motor
+            pos1_frontal = find(motor_states_frontal.TimestampSync > (peaks.time(i-1) - factor_seconds));
+            pos2_frontal = find(motor_states_frontal.TimestampSync < (peaks.time(i) + factor_seconds));
+            pos_values_frontal = intersect(pos1_frontal(:,1),pos2_frontal(:,1));
+            size_pos_values_frontal(i-1) = length(pos_values_frontal);
 
-        %%%% Frontal Motor
-        pos1_frontal = find(motor_states_frontal.TimestampSync >= peaks.time(1));
-        pos2_frontal = find(motor_states_frontal.TimestampSync <= peaks.time(2));
-        pos_values_frontal = intersect(pos1_frontal(:,1),pos2_frontal(:,1));
-        size_pos_values_frontal = length(pos_values_frontal);
+            %%%% Posterior Motor
 
-        angle_frontal_matrix = zeros(length(peaks.position),size_pos_values_frontal);
-        goal_angle_frontal_matrix = zeros(length(peaks.position),size_pos_values_frontal);
-        load_filtered_frontal_matrix = zeros(length(peaks.position),size_pos_values_frontal);
-        current_filtered_frontal_matrix = zeros(length(peaks.position),size_pos_values_frontal);
-        load_frontal_matrix = zeros(length(peaks.position),size_pos_values_frontal);
-        current_frontal_matrix = zeros(length(peaks.position),size_pos_values_frontal);
-        motor_frontal_timestamp_matrix = zeros(length(peaks.position),size_pos_values_frontal);
+            pos1_posterior = find(motor_states_posterior.TimestampSync > (peaks.time(i-1) - factor_seconds));
+            pos2_posterior = find(motor_states_posterior.TimestampSync < (peaks.time(i) + factor_seconds));
+            pos_values_posterior = intersect(pos1_posterior(:,1),pos2_posterior(:,1));
+            size_pos_values_posterior(i-1) = length(pos_values_posterior);
 
-        %%%% Posterior Motor
+            %%%% Ankle Load
 
-        pos1_posterior = find(motor_states_posterior.TimestampSync >= peaks.time(1));
-        pos2_posterior = find(motor_states_posterior.TimestampSync <= peaks.time(2));
-        pos_values_posterior = intersect(pos1_posterior(:,1),pos2_posterior(:,1));
-        size_pos_values_posterior = length(pos_values_posterior);
+            pos1_load = find(load_data.TimestampSync > (peaks.time(i-1) - factor_seconds));
+            pos2_load = find(load_data.TimestampSync < (peaks.time(i) + factor_seconds));
+            pos_values_load = intersect(pos1_load(:,1),pos2_load(:,1));
+            size_pos_values_load(i-1) = length(pos_values_load);
+            
+                   
+            %%%% Loadcells
 
-        angle_posterior_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-        goal_angle_posterior_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-        load_filtered_posterior_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-        current_filtered_posterior_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-        load_posterior_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-        current_posterior_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-        motor_posterior_timestamp_matrix = zeros(length(peaks.position),size_pos_values_posterior);
-
-        %%%% Ankle Load
-
-        pos1_load = find(load_data.TimestampSync >= peaks.time(1));
-        pos2_load = find(load_data.TimestampSync <= peaks.time(2));
-        pos_values_load = intersect(pos1_load(:,1),pos2_load(:,1));
-        size_pos_values_load = length(pos_values_load);
-        load_matrix = zeros(length(peaks.position),size_pos_values_load);
-        load_filtered_matrix = zeros(length(peaks.position),size_pos_values_load);
-        load_timestamp_matrix = zeros(length(peaks.position),size_pos_values_load);
-
-        %%%% Loadcells
-
-        pos1_frontal_loadcell = find(frontal_loadcell_force.TimestampSync >= peaks.time(1));
-        pos2_frontal_loadcell = find(frontal_loadcell_force.TimestampSync <= peaks.time(2));
-        pos_values_frontal_loadcell = intersect(pos1_frontal_loadcell(:,1),pos2_frontal_loadcell(:,1));
-        size_pos_values_frontal_loadcell = length(pos_values_frontal_loadcell);
-        frontal_loadcell_matrix = zeros(length(peaks.position),size_pos_values_frontal_loadcell);
-        frontal_loadcell_timestamp_matrix = zeros(length(peaks.position),size_pos_values_frontal_loadcell);
-
-        pos1_posterior_loadcell = find(posterior_loadcell_force.TimestampSync >= peaks.time(1));
-        pos2_posterior_loadcell = find(posterior_loadcell_force.TimestampSync <= peaks.time(2));
-        pos_values_posterior_loadcell = intersect(pos1_posterior_loadcell(:,1),pos2_posterior_loadcell(:,1));
-        size_pos_values_posterior_loadcell = length(pos_values_posterior_loadcell);
-        posterior_loadcell_matrix = zeros(length(peaks.position),size_pos_values_posterior_loadcell);
-        posterior_loadcell_timestamp_matrix = zeros(length(peaks.position),size_pos_values_posterior_loadcell);
-
-        %%%% Cut Data
+            pos1_frontal_loadcell = find(frontal_loadcell_force.TimestampSync > (peaks.time(i-1) - factor_seconds));
+            pos2_frontal_loadcell = find(frontal_loadcell_force.TimestampSync < (peaks.time(i) + factor_seconds));
+            pos_values_frontal_loadcell = intersect(pos1_frontal_loadcell(:,1),pos2_frontal_loadcell(:,1));
+            size_pos_values_frontal_loadcell(i-1) = length(pos_values_frontal_loadcell);
+            
+            
+            pos1_posterior_loadcell = find(posterior_loadcell_force.TimestampSync > (peaks.time(i-1) - factor_seconds));
+            pos2_posterior_loadcell = find(posterior_loadcell_force.TimestampSync < (peaks.time(i) + factor_seconds));
+            pos_values_posterior_loadcell = intersect(pos1_posterior_loadcell(:,1),pos2_posterior_loadcell(:,1));
+            size_pos_values_posterior_loadcell(i-1) = length(pos_values_posterior_loadcell);
+            
+        end
+        
+        angle_frontal_matrix = zeros(length(peaks.position),min(size_pos_values_frontal));
+        goal_angle_frontal_matrix = zeros(length(peaks.position),min(size_pos_values_frontal));
+        load_filtered_frontal_matrix = zeros(length(peaks.position),min(size_pos_values_frontal));
+        current_filtered_frontal_matrix = zeros(length(peaks.position),min(size_pos_values_frontal));
+        load_frontal_matrix = zeros(length(peaks.position),min(size_pos_values_frontal));
+        current_frontal_matrix = zeros(length(peaks.position),min(size_pos_values_frontal));
+        motor_frontal_timestamp_matrix =zeros(length(peaks.position),min(size_pos_values_frontal));
+        
+        angle_posterior_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        goal_angle_posterior_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        load_filtered_posterior_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        current_filtered_posterior_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        load_posterior_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        current_posterior_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        motor_posterior_timestamp_matrix = zeros(length(peaks.position),min(size_pos_values_posterior));
+        
+        load_matrix = zeros(length(peaks.position),min(size_pos_values_load));
+        load_filtered_matrix =  zeros(length(peaks.position),min(size_pos_values_load));
+        load_timestamp_matrix = zeros(length(peaks.position),min(size_pos_values_load));
+        
+        frontal_loadcell_matrix = zeros(length(peaks.position),min(size_pos_values_frontal_loadcell));
+        frontal_loadcell_timestamp_matrix = zeros(length(peaks.position),min(size_pos_values_frontal_loadcell));
+        
+        posterior_loadcell_matrix = zeros(length(peaks.position),min(size_pos_values_posterior_loadcell));
+        posterior_loadcell_timestamp_matrix = zeros(length(peaks.position),min(size_pos_values_posterior_loadcell));
+        
+        %%% Cut Data
 
         for i=1:length(peaks.position)
-            pos1_frontal = find(motor_states_frontal.TimestampSync >= peaks.time(i));
-            angle_frontal_matrix(i,:) = motor_states_frontal.Present_Angle(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
-            goal_angle_frontal_matrix(i,:) = motor_states_frontal.Goal_Angle(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
-            load_filtered_frontal_matrix(i,:) = motor_states_frontal.Load_Percentage_filtered(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
-            current_filtered_frontal_matrix(i,:) = motor_states_frontal.Current_filtered(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
-            load_frontal_matrix(i,:) = motor_states_frontal.Load_Percentage(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
-            current_frontal_matrix(i,:) = motor_states_frontal.Current(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
-            motor_frontal_timestamp_matrix(i,:) = motor_states_frontal.TimestampSync(pos1_frontal(1):pos1_frontal(1)+size_pos_values_frontal-1);
+            pos1_frontal = find(motor_states_frontal.TimestampSync >= peaks.time(i) - factor_seconds);
+            angle_frontal_matrix(i,:) = motor_states_frontal.Present_Angle(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
+            goal_angle_frontal_matrix(i,:) = motor_states_frontal.Goal_Angle(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
+            load_filtered_frontal_matrix(i,:) = motor_states_frontal.Load_Percentage_filtered(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
+            current_filtered_frontal_matrix(i,:) = motor_states_frontal.Current_filtered(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
+            load_frontal_matrix(i,:) = motor_states_frontal.Load_Percentage(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
+            current_frontal_matrix(i,:) = motor_states_frontal.Current(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
+            motor_frontal_timestamp_matrix(i,:) = motor_states_frontal.TimestampSync(pos1_frontal(1):pos1_frontal(1)+min(size_pos_values_frontal)-1);
             motor_frontal_timestamp_matrix(i,:) = motor_frontal_timestamp_matrix(i,:) - motor_frontal_timestamp_matrix(i,1);
             
-            pos1_posterior = find(motor_states_posterior.TimestampSync >= peaks.time(i));
-            angle_posterior_matrix(i,:) = motor_states_posterior.Present_Angle(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
-            goal_angle_posterior_matrix(i,:) = motor_states_posterior.Goal_Angle(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
-            load_filtered_posterior_matrix(i,:) = motor_states_posterior.Load_Percentage_filtered(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
-            current_filtered_posterior_matrix(i,:) = motor_states_posterior.Current_filtered(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
-            load_posterior_matrix(i,:) = motor_states_posterior.Load_Percentage(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
-            current_posterior_matrix(i,:) = motor_states_posterior.Current(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
-            motor_posterior_timestamp_matrix(i,:) = motor_states_posterior.TimestampSync(pos1_posterior(1):pos1_posterior(1)+size_pos_values_posterior-1);
+            pos1_posterior = find(motor_states_posterior.TimestampSync >= peaks.time(i) - factor_seconds);
+            angle_posterior_matrix(i,:) = motor_states_posterior.Present_Angle(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
+            goal_angle_posterior_matrix(i,:) = motor_states_posterior.Goal_Angle(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
+            load_filtered_posterior_matrix(i,:) = motor_states_posterior.Load_Percentage_filtered(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
+            current_filtered_posterior_matrix(i,:) = motor_states_posterior.Current_filtered(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
+            load_posterior_matrix(i,:) = motor_states_posterior.Load_Percentage(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
+            current_posterior_matrix(i,:) = motor_states_posterior.Current(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
+            motor_posterior_timestamp_matrix(i,:) = motor_states_posterior.TimestampSync(pos1_posterior(1):pos1_posterior(1)+min(size_pos_values_posterior)-1);
             motor_posterior_timestamp_matrix(i,:) = motor_posterior_timestamp_matrix(i,:) - motor_posterior_timestamp_matrix(i,1);
             
-            pos1_load = find(load_data.TimestampSync >= peaks.time(i));
-            load_matrix(i,:) = load_data.Data(pos1_load(1):pos1_load(1)+size_pos_values_load-1);
-            load_filtered_matrix(i,:) = load_data.filtered(pos1_load(1):pos1_load(1)+size_pos_values_load-1);
-            load_timestamp_matrix(i,:) = load_data.TimestampSync(pos1_load(1):pos1_load(1)+size_pos_values_load-1);
+            pos1_load = find(load_data.TimestampSync >= peaks.time(i) - factor_seconds);
+            load_matrix(i,:) = load_data.Data(pos1_load(1):pos1_load(1)+min(size_pos_values_load)-1);
+            load_filtered_matrix(i,:) = load_data.filtered(pos1_load(1):pos1_load(1)+min(size_pos_values_load)-1);
+            load_timestamp_matrix(i,:) = load_data.TimestampSync(pos1_load(1):pos1_load(1)+min(size_pos_values_load)-1);
             load_timestamp_matrix(i,:) = load_timestamp_matrix(i,:) - load_timestamp_matrix(i,1);
             
-            frontal_loadcell_matrix(i,:) = frontal_loadcell_force.Data(pos1_frontal_loadcell(1):pos1_frontal_loadcell(1)+size_pos_values_frontal_loadcell-1);
-            frontal_loadcell_timestamp_matrix (i,:) = frontal_loadcell_force.TimestampSync(pos1_frontal_loadcell(1):pos1_frontal_loadcell(1)+size_pos_values_frontal_loadcell-1);
+            pos1_frontal_loadcell = find(frontal_loadcell_force.TimestampSync >= peaks.time(i) - factor_seconds);
+            pos1_posterior_loadcell = find(posterior_loadcell_force.TimestampSync >= peaks.time(i) - factor_seconds);
+            frontal_loadcell_matrix(i,:) = frontal_loadcell_force.Data(pos1_frontal_loadcell(1):pos1_frontal_loadcell(1)+min(size_pos_values_frontal_loadcell)-1);
+            frontal_loadcell_timestamp_matrix (i,:) = frontal_loadcell_force.TimestampSync(pos1_frontal_loadcell(1):pos1_frontal_loadcell(1)+min(size_pos_values_frontal_loadcell)-1);
             frontal_loadcell_timestamp_matrix (i,:) = frontal_loadcell_timestamp_matrix (i,:) - frontal_loadcell_timestamp_matrix (i,1);
-            posterior_loadcell_matrix(i,:) = posterior_loadcell_force.Data(pos1_posterior_loadcell(1):pos1_posterior_loadcell(1)+size_pos_values_posterior_loadcell-1);
-            posterior_loadcell_timestamp_matrix (i,:) = posterior_loadcell_force.TimestampSync(pos1_posterior_loadcell(1):pos1_posterior_loadcell(1)+size_pos_values_posterior_loadcell-1);
+            posterior_loadcell_matrix(i,:) = posterior_loadcell_force.Data(pos1_posterior_loadcell(1):pos1_posterior_loadcell(1)+min(size_pos_values_posterior_loadcell)-1);
+            posterior_loadcell_timestamp_matrix (i,:) = posterior_loadcell_force.TimestampSync(pos1_posterior_loadcell(1):pos1_posterior_loadcell(1)+min(size_pos_values_posterior_loadcell)-1);
             posterior_loadcell_timestamp_matrix (i,:) = posterior_loadcell_timestamp_matrix (i,:) - posterior_loadcell_timestamp_matrix (i,1);
         end
 
@@ -219,44 +235,46 @@ function res = data_analysis(trials_dir)
         mean_posterior_loadcell.Timestamp = mean(posterior_loadcell_timestamp_matrix);
         mean_posterior_loadcell.Data = mean(posterior_loadcell_matrix);
 
+        %% Mean Processing
+        mean_load.filtered = medfilt1(mean_load.filtered,40);
 
           %% Plots
-        % %Goal vs Present Position
-        % figure(1); 
-        %     title('Motor Position');
-        %     subplot(1,2,1); plot(motor_states_frontal.Timestamp, motor_states_frontal.Goal_Angle); hold on; plot(motor_states_frontal.Timestamp, motor_states_frontal.Present_Angle);
-        %     subplot(1,2,2); plot(motor_states_posterior.Timestamp, motor_states_posterior.Goal_Angle); hold on; plot(motor_states_posterior.Timestamp, motor_states_posterior.Present_Angle);
-        %     
-        %     
-        % %Force Tendon
-        % figure(2)
-        %     title('Force Tendon');
-        %     plot(frontal_loadcell_force.Timestamp,frontal_loadcell_force.Data); hold on;
-        %     plot(posterior_loadcell_force.Timestamp,posterior_loadcell_force.Data);
-        %     legend('Frontal','Posterior');
-        %     
-        % 
-        % %Torque Sensor
-        % figure(3)
-        %     subplot(3,1,1); %plot(load_data.Timestamp,load_data.Data); hold on;
-        %                     plot(load_data.Timestamp,load_data.filtered)
-        %                     title('Ankle Torque');
-        %                     %legend('Data', 'Filtered')
-        %                     
-        %     subplot(3,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage_filtered); hold on;
-        %                     plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage_filtered);
-        %                     title('Motor Load');
-        %                     
-        %     subplot(3,1,3); plot(motor_states_frontal.Timestamp,motor_states_frontal.Current_filtered); hold on;
-        %                     plot(motor_states_posterior.Timestamp,motor_states_posterior.Current_filtered);
-        %                     title('Motor Current');
-        %                     legend('Frontal','Posterior');
-        %                     %plot(motor_states_frontal.Timestamp,motor_states_frontal.Current)
-        %                     %plot(motor_states_posterior.Timestamp,motor_states_posterior.Current)
-        %                     %legend('Frontal Filtered','Posterior Filtered','Frontal','Posterior')
-        %                     
-        %Mean Values
-%         figure(4); 
+%         %Goal vs Present Position
+%         figure(1); 
+%             title('Motor Position');
+%             subplot(1,2,1); plot(motor_states_frontal.Timestamp, motor_states_frontal.Goal_Angle); hold on; plot(motor_states_frontal.Timestamp, motor_states_frontal.Present_Angle);
+%             subplot(1,2,2); plot(motor_states_posterior.Timestamp, motor_states_posterior.Goal_Angle); hold on; plot(motor_states_posterior.Timestamp, motor_states_posterior.Present_Angle);
+%             
+%             
+%         %Force Tendon
+%         figure(2)
+%             title('Force Tendon');
+%             plot(frontal_loadcell_force.Timestamp,frontal_loadcell_force.Data); hold on;
+%             plot(posterior_loadcell_force.Timestamp,posterior_loadcell_force.Data);
+%             legend('Frontal','Posterior');
+%             
+%         
+%         %Torque Sensor
+%         figure(3)
+%             subplot(3,1,1); %plot(load_data.Timestamp,load_data.Data); hold on;
+%                             plot(load_data.Timestamp,load_data.filtered)
+%                             title('Ankle Torque');
+%                             %legend('Data', 'Filtered')
+%                             
+%             subplot(3,1,2); plot(motor_states_frontal.Timestamp,motor_states_frontal.Load_Percentage_filtered); hold on;
+%                             plot(motor_states_posterior.Timestamp,motor_states_posterior.Load_Percentage_filtered);
+%                             title('Motor Load');
+%                             
+%             subplot(3,1,3); plot(motor_states_frontal.Timestamp,motor_states_frontal.Current_filtered); hold on;
+%                             plot(motor_states_posterior.Timestamp,motor_states_posterior.Current_filtered);
+%                             title('Motor Current');
+%                             legend('Frontal','Posterior');
+%                             %plot(motor_states_frontal.Timestamp,motor_states_frontal.Current)
+%                             %plot(motor_states_posterior.Timestamp,motor_states_posterior.Current)
+%                             %legend('Frontal Filtered','Posterior Filtered','Frontal','Posterior')
+%                             
+%         %Mean Values
+%         figure; 
 %             subplot(5,2,1); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.goal_angle); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.angle); title('Frontal Motor Angle');
 %             subplot(5,2,2); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.goal_angle); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.angle); title('Posterior Motor Angle');
 %             subplot(5,2,3); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.current); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.current_filtered); legend('Data','Filtered'); title('Frontal Motor Current');
@@ -265,10 +283,10 @@ function res = data_analysis(trials_dir)
 %             subplot(5,2,6); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.load); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.load_filtered); legend('Data','Filtered'); title('Posterior Motor Load');
 %             subplot(5,2,7:8); plot(mean_load.Timestamp, mean_load.Data); hold on; plot(mean_load.Timestamp, mean_load.filtered); legend('Data','Filtered'); title('Torque Sensor');
 %             subplot(5,2,9:10); plot(mean_frontal_loadcell.Timestamp,mean_frontal_loadcell.Data); hold on; plot(mean_posterior_loadcell.Timestamp,mean_posterior_loadcell.Data); legend('Frontal','Posterior'); title('Loadcell Data')
-           
+        
         %% Clean Workspace
 
-        clear *_matrix pos1* pos2* pos_* size* peaks i bag motor_characteristics;
+        %clear *_matrix pos1* pos2* pos_* size* peaks i bag motor_characteristics SyncTime s factor_seconds;
 
         %% Save Data
 
@@ -279,10 +297,7 @@ function res = data_analysis(trials_dir)
         end
         name_file = name_file + "_" + string(trials_dir(s(i)+1:length(trials_dir)-4));
         name_file = strrep(name_file,'.._','');
-        %clear s i trials_dir;
+        clear s i trials_dir;
         name_file = "./" +name_file;
         save(name_file, '-regexp', '^(?!(name_file)$).');
         res = 1;
-    %catch
-        %res = 0;
-    %end
