@@ -1,10 +1,13 @@
-%function res = data_analysis(trials_dir)
+function res = data_analysis(trials_dir)
         
         clearvars -except trials_dir
-
-        %motor_characteristics = ReadYaml('../../../../yaml/tilt.yaml');
-        motor_characteristics = ReadYaml('../../yaml/tilt.yaml'); %Executing code directly
-        trials_dir = '../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/step_response.bag';
+        
+        %% Executing code as function
+        motor_characteristics = ReadYaml('../../../../yaml/tilt.yaml');
+        
+        %% Executing code directly
+        %motor_characteristics = ReadYaml('../../yaml/tilt.yaml'); 
+        %trials_dir = '../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/step_response.bag';
         
         %% Read Trials
 
@@ -237,6 +240,37 @@
 
         %% Mean Processing
         mean_load.filtered = medfilt1(mean_load.filtered,40);
+        
+        %% Assign Matrix Values 
+        %Motors 
+        matrix_frontal_motor.Timestamp = motor_frontal_timestamp_matrix;
+        matrix_frontal_motor.goal_angle = goal_angle_frontal_matrix;
+        matrix_frontal_motor.angle = angle_frontal_matrix;
+        matrix_frontal_motor.current = current_frontal_matrix;
+        matrix_frontal_motor.current_filtered = current_filtered_frontal_matrix;
+        matrix_frontal_motor.load = load_frontal_matrix;
+        matrix_frontal_motor.load_filtered = load_filtered_frontal_matrix;
+        
+        matrix_posterior_motor.Timestamp = motor_posterior_timestamp_matrix;
+        matrix_posterior_motor.goal_angle = goal_angle_posterior_matrix;
+        matrix_posterior_motor.angle = angle_posterior_matrix;
+        matrix_posterior_motor.current = current_posterior_matrix;
+        matrix_posterior_motor.current_filtered = current_filtered_posterior_matrix;
+        matrix_posterior_motor.load = load_posterior_matrix;
+        matrix_posterior_motor.load_filtered = load_filtered_posterior_matrix;
+        
+        %Load Data
+        matrix_load.Timestamp = load_timestamp_matrix;
+        matrix_load.Data = load_matrix;
+        matrix_load.filtered = load_filtered_matrix;
+        
+        %Loadcells
+        matrix_frontal_loadcell.Timestamp = frontal_loadcell_timestamp_matrix;
+        matrix_frontal_loadcell.force = frontal_loadcell_matrix;
+        
+        matrix_posterior_loadcell.Timestamp = posterior_loadcell_timestamp_matrix;
+        matrix_posterior_loadcell.force = posterior_loadcell_matrix;
+        
 
           %% Plots
 %         %Goal vs Present Position
@@ -273,20 +307,20 @@
 %                             %plot(motor_states_posterior.Timestamp,motor_states_posterior.Current)
 %                             %legend('Frontal Filtered','Posterior Filtered','Frontal','Posterior')
 %                             
-%         %Mean Values
-%         figure; 
-%             subplot(5,2,1); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.goal_angle); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.angle); title('Frontal Motor Angle');
-%             subplot(5,2,2); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.goal_angle); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.angle); title('Posterior Motor Angle');
-%             subplot(5,2,3); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.current); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.current_filtered); legend('Data','Filtered'); title('Frontal Motor Current');
-%             subplot(5,2,4); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.current); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.current_filtered); legend('Data','Filtered'); title('Posterior Motor Current');
-%             subplot(5,2,5); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.load); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.load_filtered); legend('Data','Filtered'); title('Frontal Motor Load');
-%             subplot(5,2,6); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.load); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.load_filtered); legend('Data','Filtered'); title('Posterior Motor Load');
-%             subplot(5,2,7:8); plot(mean_load.Timestamp, mean_load.Data); hold on; plot(mean_load.Timestamp, mean_load.filtered); legend('Data','Filtered'); title('Torque Sensor');
-%             subplot(5,2,9:10); plot(mean_frontal_loadcell.Timestamp,mean_frontal_loadcell.Data); hold on; plot(mean_posterior_loadcell.Timestamp,mean_posterior_loadcell.Data); legend('Frontal','Posterior'); title('Loadcell Data')
+        %Mean Values
+        figure; 
+            subplot(5,2,1); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.goal_angle); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.angle); title('Frontal Motor Angle');
+            subplot(5,2,2); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.goal_angle); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.angle); title('Posterior Motor Angle');
+            subplot(5,2,3); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.current); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.current_filtered); legend('Data','Filtered'); title('Frontal Motor Current');
+            subplot(5,2,4); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.current); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.current_filtered); legend('Data','Filtered'); title('Posterior Motor Current');
+            subplot(5,2,5); plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.load); hold on; plot(mean_motor_state_frontal.Timestamp,mean_motor_state_frontal.load_filtered); legend('Data','Filtered'); title('Frontal Motor Load');
+            subplot(5,2,6); plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.load); hold on; plot(mean_motor_state_posterior.Timestamp,mean_motor_state_posterior.load_filtered); legend('Data','Filtered'); title('Posterior Motor Load');
+            subplot(5,2,7:8); plot(mean_load.Timestamp, mean_load.Data); hold on; plot(mean_load.Timestamp, mean_load.filtered); legend('Data','Filtered'); title('Torque Sensor');
+            subplot(5,2,9:10); plot(mean_frontal_loadcell.Timestamp,mean_frontal_loadcell.Data); hold on; plot(mean_posterior_loadcell.Timestamp,mean_posterior_loadcell.Data); legend('Frontal','Posterior'); title('Loadcell Data')
         
         %% Clean Workspace
 
-        %clear *_matrix pos1* pos2* pos_* size* peaks i bag motor_characteristics SyncTime s factor_seconds;
+        clear *_matrix pos1* pos2* pos_* size* peaks i bag motor_characteristics SyncTime s factor_seconds;
 
         %% Save Data
 

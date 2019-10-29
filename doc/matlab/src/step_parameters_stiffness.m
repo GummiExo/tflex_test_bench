@@ -1,6 +1,6 @@
 %function [td1, ts1, tr1, tp_min, initial_value1, final_value1, td2, ts2, tr2, tp_max, initial_value2, final_value2, max_peak_value, min_peak_value] = step_parameters(input1,input2,output)
 clc;
-clearvars -except input1 input2 output
+clearvars -except input1 input2 plot_response output
 
 load('data/step_response/Tendons_Stiffness_Equal_Pretension_5N_step_response')
 
@@ -120,6 +120,7 @@ td2 = mean(output.Timestamp(delay_pos2));
 
 %% Plot
 
+if plot_response == 0
  figure;
  %Data
  plot(input1.Timestamp,input1.goal_angle)
@@ -139,8 +140,7 @@ td2 = mean(output.Timestamp(delay_pos2));
  plot(output.Timestamp(delay_pos1),output.filtered(delay_pos1),'LineWidth',3);
  plot(output.Timestamp(delay_pos2),output.filtered(delay_pos2),'LineWidth',3);
  legend('Goal Frontal','Goal Posterior','Torque','ts1','ts2','tr1','tr2','max peak','min peak','delay1 values','delay2 values')
-
- 
+end
  
 % %% Parameters used to calculate time values
 

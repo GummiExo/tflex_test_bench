@@ -1,6 +1,6 @@
-function [td1, ts1, tr1, tp_min, initial_value1, final_value1, td2, ts2, tr2, tp_max, initial_value2, final_value2, max_peak_value, min_peak_value] = step_parameters(input1,input2,output)
+function [td1, ts1, tr1, tp_min, initial_value1, final_value1, td2, ts2, tr2, tp_max, initial_value2, final_value2, max_peak_value, min_peak_value] = step_parameters(input1,input2,output,plot_response)
 clc;
-clearvars -except input1 input2 output
+clearvars -except input1 input2 plot_response output
 
 %load('data/step_response/Rigid_and_Tendons_FlexExte_Equal_Pretension_5N_step_response')
 
@@ -82,10 +82,20 @@ t2 = output.Timestamp(t2_pos_output);
 %Final Time
 
 tf2_vector = intersect(find(input2.goal_angle > -14),find(input2.Timestamp > input2.Timestamp(max_peak_pos_input2)));
-tf2_pos_input2 = tf2_vector(1);
+if ~isempty(tf2_vector) == 0
+    tf2_vector = find(input2.Timestamp <= t2 + 1);
+    tf2_pos_input2 = tf2_vector(end);
+else
+    tf2_pos_input2 = tf2_vector(1);
+end
 tf2_input2 = input2.Timestamp(tf2_pos_input2(1));
-tf2_pos_output = find(output.Timestamp > tf2_input2,1);
+tf2_pos_output = find(output.Timestamp >= tf2_input2,1);
+if ~isempty(tf2_pos_output) == 0
+    tf2_vector_output = find(output.Timestamp <= tf2_input2);
+    tf2_pos_output = tf2_vector_output(tf2_vector_output(end));
+end
 tf2 = output.Timestamp(tf2_pos_output);
+
 
 %Final and Initial Values of Torque
 initial_value2 = output.filtered(t2_pos_output);
@@ -124,6 +134,7 @@ td2 = mean(output.Timestamp(delay_pos2));
 
 %% Plot
 
+if plot_response == "on"
  figure;
  %Data
  plot(input1.Timestamp,input1.goal_angle)
@@ -144,7 +155,7 @@ td2 = mean(output.Timestamp(delay_pos2));
  plot(output.Timestamp(delay_pos2),output.filtered(delay_pos2),'LineWidth',3);
  legend('Goal Frontal','Goal Posterior','Torque','ts1','ts2','tr1','tr2','max peak','min peak','delay1 values','delay2 values')
 
- 
+end
  
 % %% Parameters used to calculate time values
 
