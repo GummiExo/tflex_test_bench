@@ -12,7 +12,7 @@ f = figure(1);
     L1 = plot(step_response(1).mean_motor_state_frontal.Timestamp,-step_response(1).mean_motor_state_frontal.goal_angle, '--', 'LineWidth', 2, 'Color', [0 84 159]/255, 'Parent', firstax);
     hold on;
     L2 = plot(step_response(1).mean_motor_state_posterior.Timestamp,step_response(1).mean_motor_state_posterior.goal_angle, '--', 'LineWidth', 2, 'Color', [0 184 159]/255, 'Parent', firstax);
-    set(firstax, 'Box', 'off','XLim',[0 3], 'YLim',[-15 15]);
+    set(firstax, 'Box', 'off','XLim',[0 2], 'YLim',[-15 15]);
     l = legend([L1 L2], {'Frontal: Flexion', 'Posterior: Extension'},'FontSize',font_size_legends,'FontName','FreeSerif');
     title(l,'Motors Goal Angle')
     pos = get(l,'Position');
@@ -57,7 +57,7 @@ f = figure(1);
     yyaxis right;
     ylim([-13 10])
     set(gca,'FontSize',font_size_axis,'FontName','FreeSerif', 'yticklabel', sprintfc('\\color{black}%g', get(gca,'Ytick')))
-    ylabel('Torque [N]','FontSize',font_size_axis,'FontName','FreeSerif', 'Color', 'Black');
+    ylabel('Torque [Nm]','FontSize',font_size_axis,'FontName','FreeSerif', 'Color', 'Black');
     title('Ankle torque response for flexion and extension movements','FontSize',font_size_title,'FontName','FreeSerif')
     grid on;
     hold off

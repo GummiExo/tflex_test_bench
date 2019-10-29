@@ -108,4 +108,46 @@ for i = 3:3:length(step_info)
     
 end
 
+%% Plot Step Parameters Flexo-Extension
+delay_mean1 = [mean_std_trials(3).time_delay.mean1*1000; mean_std_trials(1).time_delay.mean1*1000; mean_std_trials(2).time_delay.mean1*1000; mean_std_trials(6).time_delay.mean1*1000; mean_std_trials(4).time_delay.mean1*1000; mean_std_trials(5).time_delay.mean1*1000];
+delay_std1 = [mean_std_trials(3).time_delay.std1*1000; mean_std_trials(1).time_delay.std1*1000; mean_std_trials(2).time_delay.std1*1000; mean_std_trials(6).time_delay.std1*1000; mean_std_trials(4).time_delay.std1*1000; mean_std_trials(5).time_delay.std1*1000];
+sta_mean1 = [mean_std_trials(3).time_stabilization.mean1*1000; mean_std_trials(1).time_stabilization.mean1*1000; mean_std_trials(2).time_stabilization.mean1*1000; mean_std_trials(6).time_stabilization.mean1*1000; mean_std_trials(4).time_stabilization.mean1*1000; mean_std_trials(5).time_stabilization.mean1*1000];
+sta_std1 = [mean_std_trials(3).time_stabilization.std1*1000; mean_std_trials(1).time_stabilization.std1*1000; mean_std_trials(2).time_stabilization.std1*1000; mean_std_trials(6).time_stabilization.std1*1000; mean_std_trials(4).time_stabilization.std1*1000; mean_std_trials(5).time_stabilization.std1*1000];
+rise_mean1 = [mean_std_trials(3).time_rise.mean1*1000; mean_std_trials(1).time_rise.mean1*1000; mean_std_trials(2).time_rise.mean1*1000; mean_std_trials(6).time_rise.mean1*1000; mean_std_trials(4).time_rise.mean1*1000; mean_std_trials(5).time_rise.mean1*1000];
+rise_std1 = [mean_std_trials(3).time_rise.std1*1000; mean_std_trials(1).time_rise.std1*1000; mean_std_trials(2).time_rise.std1*1000; mean_std_trials(6).time_rise.std1*1000; mean_std_trials(4).time_rise.std1*1000; mean_std_trials(5).time_rise.std1*1000];
 
+delay_mean2 = [mean_std_trials(3).time_delay.mean2*1000; mean_std_trials(1).time_delay.mean2*1000; mean_std_trials(2).time_delay.mean2*1000; mean_std_trials(6).time_delay.mean2*1000; mean_std_trials(4).time_delay.mean2*1000; mean_std_trials(5).time_delay.mean2*1000];
+delay_std2 = [mean_std_trials(3).time_delay.std2*1000; mean_std_trials(1).time_delay.std2*1000; mean_std_trials(2).time_delay.std2*1000; mean_std_trials(6).time_delay.std2*1000; mean_std_trials(4).time_delay.std2*1000; mean_std_trials(5).time_delay.std2*1000];
+sta_mean2 = [mean_std_trials(3).time_stabilization.mean2*1000; mean_std_trials(1).time_stabilization.mean2*1000; mean_std_trials(2).time_stabilization.mean2*1000; mean_std_trials(6).time_stabilization.mean2*1000; mean_std_trials(4).time_stabilization.mean2*1000; mean_std_trials(5).time_stabilization.mean2*1000];
+sta_std2 = [mean_std_trials(3).time_stabilization.std1*1000; mean_std_trials(1).time_stabilization.std1*1000; mean_std_trials(2).time_stabilization.std2*1000; mean_std_trials(6).time_stabilization.std2*1000; mean_std_trials(4).time_stabilization.std2*1000; mean_std_trials(5).time_stabilization.std2*1000];
+rise_mean2 = [mean_std_trials(3).time_rise.mean2*1000; mean_std_trials(1).time_rise.mean2*1000; mean_std_trials(2).time_rise.mean2*1000; mean_std_trials(6).time_rise.mean2*1000; mean_std_trials(4).time_rise.mean2*1000; mean_std_trials(5).time_rise.mean2*1000];
+rise_std2 = [mean_std_trials(3).time_rise.std2*1000; mean_std_trials(1).time_rise.std2*1000; mean_std_trials(2).time_rise.std2*1000; mean_std_trials(6).time_rise.std2*1000; mean_std_trials(4).time_rise.std2*1000; mean_std_trials(5).time_rise.std2*1000];
+
+
+figure;
+    
+    subplot(2,3,1); bar(delay_mean1);  hold on; errorbar(1:6,delay_mean1,delay_std1,'LineStyle','none')
+    set(gca, 'XTickLabel',{'R-T:5N','R-T:10N','R-T:20N','T:5N','T:10N','T:20N'});
+    title('Delay Time Flexion'); ylabel('Time [ms]'); hold off; 
+    
+    subplot(2,3,2); bar(sta_mean1);  hold on; errorbar(1:6,sta_mean1,sta_std1,'LineStyle','none');
+    set(gca, 'XTickLabel',{'R-T:5N','R-T:10N','R-T:20N','T:5N','T:10N','T:20N'});
+    title('Stabilization Time Flexion'); ylabel('Time [ms]'); hold off; 
+    
+    subplot(2,3,3); bar(rise_mean1);  hold on; errorbar(1:6,rise_mean1,rise_std1,'LineStyle','none');
+    set(gca, 'XTickLabel',{'R-T:5N','R-T:10N','R-T:20N','T:5N','T:10N','T:20N'});
+    title('Rise Time Flexion'); ylabel('Time [ms]'); hold off; 
+    
+    subplot(2,3,4); bar(delay_mean2);  hold on; errorbar(1:6,delay_mean2,delay_std2,'LineStyle','none')
+    set(gca, 'XTickLabel',{'R-T:5N','R-T:10N','R-T:20N','T:5N','T:10N','T:20N'});
+    title('Delay Time Extension'); ylabel('Time [ms]'); hold off; 
+    
+    subplot(2,3,5); bar(sta_mean2);  hold on; errorbar(1:6,sta_mean2,sta_std2,'LineStyle','none');
+    set(gca, 'XTickLabel',{'R-T:5N','R-T:10N','R-T:20N','T:5N','T:10N','T:20N'});
+    title('Stabilization Time Extension'); ylabel('Time [ms]'); hold off; 
+    
+    subplot(2,3,6); bar(rise_mean2);  hold on; errorbar(1:6,rise_mean2,rise_std2,'LineStyle','none');
+    set(gca, 'XTickLabel',{'R-T:5N','R-T:10N','R-T:20N','T:5N','T:10N','T:20N'});
+    title('Rise Time Extension'); ylabel('Time [ms]'); hold off; 
+    
+    suptitle('Time Values for Flexo-Extension')
