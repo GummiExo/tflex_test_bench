@@ -55,8 +55,8 @@ class LoadCellSensor(object):
         try:
             data = self.ser.readline()
             pos_data = data.find('\t')
-            # print(data[0:6])
-            # print(data[11:17])
+            #print(data[0:6])
+            #print(data[11:17])
             if pos_data == 10:
                 pos_frontal = 3
             else:
