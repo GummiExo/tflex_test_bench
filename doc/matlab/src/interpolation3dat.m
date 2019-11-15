@@ -37,6 +37,7 @@ elseif min_length == len_posterior
     frontal_interp.Goal_Angle = interp1(frontal.Timestamp,frontal.Goal_Angle,posterior.Timestamp);
     frontal_interp.Timestamp = posterior.Timestamp;
     posterior_interp.Present_Angle = posterior.Present_Angle;
+    posterior_interp.Goal_Angle = posterior.Goal_Angle;
     posterior_interp.Timestamp = posterior.Timestamp;
 end
 
