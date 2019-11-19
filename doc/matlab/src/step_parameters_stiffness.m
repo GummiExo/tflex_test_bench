@@ -79,8 +79,8 @@ output.filtered(:) = output.filtered(:) + abs(min_peak_value);
 
 %Stabilization Positions
 window_stabilization1 = abs(window_percentage*final_value1/100);
-stabilization_pos1 = intersect(find((output.filtered(t1_pos_output:tf1_pos_output)+abs(min_peak_value)) >= (final_value1+abs(min_peak_value) - window_stabilization1)),find(output.filtered(t1_pos_output:tf1_pos_output) <= (final_value1+abs(min_peak_value) + window_stabilization1)));
-stabilization_pos1 = stabilization_pos1 + t1_pos_output -1;
+stabilization_pos1 = intersect(find((output.filtered(min_peak_pos_output:tf1_pos_output)+abs(min_peak_value)) >= (final_value1+abs(min_peak_value) - window_stabilization1)),find(output.filtered(min_peak_pos_output:tf1_pos_output) <= (final_value1+abs(min_peak_value) + window_stabilization1)));
+stabilization_pos1 = stabilization_pos1 + min_peak_pos_output -1;
 
 %Stabilization Value
 stabilization_value1 = mean(output.filtered(stabilization_pos1) - abs(min_peak_value));
@@ -93,11 +93,11 @@ rise_time_pos = find(-output.filtered(t1_pos_output:tf1_pos_output) + initial_va
 tr1 = output.Timestamp(rise_time_pos);  
 
 %Stabilization Time
-stabilization_time_pos1 = find(-output.filtered(t1_pos_output:tf1_pos_output) + initial_value1 >= (abs(stabilization_value1) + abs(initial_value1))*1.03,1) + t1_pos_output - 1;
+stabilization_time_pos1 = find(-output.filtered(t1_pos_output:tf1_pos_output) + initial_value1 >= (abs(stabilization_value1) + initial_value1)*1.03,1) + t1_pos_output - 1;
 ts1 = output.Timestamp(stabilization_time_pos1);
 
 if isempty(ts1) == 1 || ts1 <= tr1
-    stabilization_time_pos1 = find(-output.filtered(t1_pos_output:tf1_pos_output) + initial_value1 >= (abs(stabilization_value1) + abs(initial_value1))*0.97,1) + t1_pos_output - 1;
+    stabilization_time_pos1 = find(-output.filtered(t1_pos_output:tf1_pos_output) + initial_value1 >= (abs(stabilization_value1) + initial_value1)*0.97,1) + t1_pos_output - 1;
     ts1 = output.Timestamp(stabilization_time_pos1);
 end
 
@@ -134,11 +134,11 @@ rise_time_pos2 = find(output.filtered(t2_pos_output:tf2_pos_output) + abs(initia
 tr2 = output.Timestamp(rise_time_pos2);  
 
 %Stabilization Time
-stabilization_time_pos2 = find(output.filtered(t2_pos_output:tf2_pos_output) + abs(initial_value2) >= (abs(stabilization_value2) + abs(initial_value2))*1.03,1) + t2_pos_output - 1;
+stabilization_time_pos2 = find(output.filtered(t2_pos_output:tf2_pos_output) + abs(initial_value2) >= abs((abs(stabilization_value2) + initial_value2))*1.03,1) + t2_pos_output - 1;
 ts2 = output.Timestamp(stabilization_time_pos2);
 
 if isempty(ts2) == 1 || ts2 <= tr2
-    stabilization_time_pos2 = find(output.filtered(t2_pos_output:tf2_pos_output) + abs(initial_value2) >= (abs(stabilization_value2) + abs(initial_value2))*0.97,1) + t2_pos_output - 1;
+    stabilization_time_pos2 = find(output.filtered(t2_pos_output:tf2_pos_output) + abs(initial_value2) >= abs((abs(stabilization_value2) + initial_value2))*0.97,1) + t2_pos_output - 1;
     ts2 = output.Timestamp(stabilization_time_pos2);
 end
 

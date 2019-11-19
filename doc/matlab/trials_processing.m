@@ -23,9 +23,12 @@ trials_dir = '../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/chirp_r
 data_analysis(trials_dir);
 cd ../../
 
-cd data/model/
+cd ../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/
+unzip('model_response.zip');
+cd ../../../../../matlab/data/model
 trials_dir = '../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/model_response.bag';
 data_analysis(trials_dir);
+delete ../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/5N/model_response.bag
 cd ../../
 
 %%  Tendons FlexExtension 10N
@@ -48,10 +51,14 @@ trials_dir = '../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/10N/chirp_
 data_analysis(trials_dir);
 cd ../../
 
-cd data/model/
+cd ../tflex_trials/Tendons/FlexExte/Equal_Pretension/10N/
+unzip('model_response.zip');
+cd ../../../../../matlab/data/model
 trials_dir = '../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/10N/model_response.bag';
 data_analysis(trials_dir);
+delete ../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/10N/model_response.bag
 cd ../../
+
 %%  Tendons FlexExtension 20N
 
 cd data/step_response/
@@ -72,9 +79,12 @@ trials_dir = '../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/20N/chirp_
 data_analysis(trials_dir);
 cd ../../
 
-cd data/model/
+cd ../tflex_trials/Tendons/FlexExte/Equal_Pretension/20N/
+unzip('model_response.zip');
+cd ../../../../../matlab/data/model
 trials_dir = '../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/20N/model_response.bag';
 data_analysis(trials_dir);
+delete ../../../tflex_trials/Tendons/FlexExte/Equal_Pretension/20N/model_response.bag
 cd ../../
 
 %%  Tendons Stiffness 5N
@@ -160,9 +170,12 @@ trials_dir = '../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/
 data_analysis(trials_dir);
 cd ../../
 
-cd data/model/
+cd ../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/5N/
+unzip('model_response.zip');
+cd ../../../../../matlab/data/model
 trials_dir = '../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/5N/model_response.bag';
 data_analysis(trials_dir);
+delete ../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/5N/model_response.bag
 cd ../../
 
 %%  Rigid Filaments and Tendons FlexExtension 10N
@@ -185,10 +198,14 @@ trials_dir = '../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/
 data_analysis(trials_dir);
 cd ../../
 
-cd data/model/
+cd ../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/10N/
+unzip('model_response.zip');
+cd ../../../../../matlab/data/model
 trials_dir = '../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/10N/model_response.bag';
 data_analysis(trials_dir);
+delete ../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/10N/model_response.bag
 cd ../../
+
 
 %%  Rigid Filaments and Tendons FlexExtension 20N
 
@@ -210,7 +227,10 @@ trials_dir = '../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/
 data_analysis(trials_dir);
 cd ../../
 
-cd data/model/
+cd ../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/20N/
+unzip('model_response.zip');
+cd ../../../../../matlab/data/model
 trials_dir = '../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/20N/model_response.bag';
 data_analysis(trials_dir);
+delete ../../../tflex_trials/Rigid_and_Tendons/FlexExte/Equal_Pretension/20N/model_response.bag
 cd ../../
