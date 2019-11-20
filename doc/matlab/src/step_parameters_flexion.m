@@ -66,7 +66,8 @@ if isempty(tf2_pos_output) == 1
 end
 
 %% Frontal Motor
-window_percentage = 1; %Size of window to calculate values
+window_percentage = 3; %Size of window to calculate values
+adjust_pos_final_value = 90;
 
 %Final and Initial Values of Torque
 initial_value1 = output.filtered(t1_pos_output);
@@ -111,7 +112,7 @@ td1 = mean(output.Timestamp(delay_pos1));
 
 %Final and Initial Values of Torque
 initial_value2 = output.filtered(t2_pos_output);
-final_value2 = output.filtered(tf2_pos_output);
+final_value2 = output.filtered(tf2_pos_output - adjust_pos_final_value);
 
 %Move torque data to the y positive axis
 output.filtered(:) = output.filtered(:) + abs(min_peak_value);

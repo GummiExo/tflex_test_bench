@@ -68,7 +68,7 @@ end
 
 %% Stiffness Movement
 
-window_percentage = 1; %Size of window to calculate values
+window_percentage = 3; %Size of window to calculate values
 
 %Final and Initial Values of Torque
 initial_value1 = output.filtered(t1_pos_output);
