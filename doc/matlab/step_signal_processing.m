@@ -23,7 +23,7 @@ cd data/step_response/
 files = dir('*.mat');
 
 %% Step Parameters
-plot_response = "on";
+plot_response = "off";
 for i=1:length(files)
    load(files(i).name);
    for j=1:size(matrix_load.Data,1)
@@ -103,6 +103,16 @@ for i=1:length(files)
         elseif i == 7 && j == 18
             output.filtered(21:30) = (output.filtered(20) + output.filtered(31))/2;
             output.filtered(35:37) = (output.filtered(34) + output.filtered(38))/2;
+        elseif i == 8 && j == 1
+            output.filtered(314:514) = mean(output.filtered(150:314));
+        elseif i == 8 && j == 2
+            output.filtered(296:524) = mean(output.filtered(138:269));
+        elseif i == 8 && j == 3
+            output.filtered(336:518) = mean(output.filtered(157:335));
+        elseif i == 8 && j == 4
+            output.filtered(326:526) = mean(output.filtered(163:326));
+        elseif i == 8 && j == 5
+            output.filtered(139:520) = mean(output.filtered(139:372));
         elseif i == 8 && j == 14
             output.filtered(417:494) = (output.filtered(416) + output.filtered(495))/2;
         elseif i == 9 && j == 1
@@ -146,23 +156,23 @@ for i=1:length(files)
             
         end
         
-        if ~isempty(strfind(files(i).name,'Stiffness')) == 0
+        if isempty(strfind(files(i).name,'Stiffness')) == 1
             %plot(output.filtered); hold on;
             output.filtered = medfilt1(output.filtered,50);
             %plot(output.filtered); legend('Normal','Filtered');
             %frame_h = get(handle(gcf),'JavaFrame');
             %set(frame_h,'Maximized',1);
             [step_info{i}.td1(j),step_info{i}.ts1(j),step_info{i}.tr1(j),step_info{i}.tp_min(j),step_info{i}.initial_value1(j),step_info{i}.final_value1(j),step_info{i}.td2(j),step_info{i}.ts2(j),step_info{i}.tr2(j),step_info{i}.tp_max(j),step_info{i}.initial_value2(j),step_info{i}.final_value2(j),step_info{i}.max_peak_value(j),step_info{i}.min_peak_value(j)] = step_parameters_flexion(input1,input2,output,plot_response); 
-            close;
+            close all;
             step_info{i}.Trial = files(i).name;
         else
-            %plot(output.filtered); hold on;
+            plot(output.filtered); hold on;
             output.filtered = medfilt1(output.filtered,40);
-            %plot(output.filtered); legend('Normal','Filtered');
-            %frame_h = get(handle(gcf),'JavaFrame');
-            %set(frame_h,'Maximized',1);
+            plot(output.filtered); legend('Normal','Filtered');
+            frame_h = get(handle(gcf),'JavaFrame');
+            set(frame_h,'Maximized',1);
             [step_info{i}.td1(j),step_info{i}.ts1(j),step_info{i}.tr1(j),step_info{i}.tp_min(j),step_info{i}.initial_value1(j),step_info{i}.final_value1(j),step_info{i}.td2(j),step_info{i}.ts2(j),step_info{i}.tr2(j),step_info{i}.tp_max(j),step_info{i}.initial_value2(j),step_info{i}.final_value2(j),step_info{i}.max_peak_value(j),step_info{i}.min_peak_value(j)] = step_parameters_stiffness(input1,input2,output,plot_response); 
-            close;
+            close all;
             step_info{i}.Trial = files(i).name;
         end
         clear input* output
@@ -185,7 +195,6 @@ step_info(1).ts2(14-8) = [];
 step_info(1).ts2(15-9) = [];
 step_info(1).ts2(19-10) = [];
  
-% step_info(3).td1(17) = mean(step_info(3).td1(1:16));
 step_info(3).ts1(3) = [];
 step_info(3).ts1(4-1) = [];
 step_info(3).ts1(5-2) = [];
@@ -202,39 +211,51 @@ step_info(4).td2(12-1) = [];
 step_info(4).td2(13-2) = [];
 
 % %Stiffness
-% step_info(7).td1(1) = mean(step_info(7).td1(2:9));
-% step_info(7).td1(10) = mean(step_info(7).td1(1:9));
-% step_info(7).td1(11) = mean(step_info(7).td1(1:11));
-% step_info(7).td1(16) = mean(step_info(7).td1(1:15));
-% step_info(7).td1(18) = mean(step_info(7).td1(1:17));
-% step_info(7).ts2(5) = mean(step_info(7).ts2(1:4));
-% step_info(7).ts2(7) = mean(step_info(7).ts2(1:6));
-% step_info(7).ts2(11) = mean(step_info(7).ts2(1:10));
-% step_info(7).ts2(18) = mean(step_info(7).ts2(1:17));
-% 
-% step_info(8).td1(6) = mean(step_info(8).td1(1:5));
-% step_info(8).td1(8) = mean(step_info(8).td1(1:7));
-% step_info(8).td1(10) = mean(step_info(8).td1(1:9));
-% step_info(8).td1(12) = mean(step_info(8).td1(1:11));
-% step_info(8).tr1(10) = mean(step_info(8).tr1(1:9));
-% step_info(8).tr1(12) = mean(step_info(8).tr1(1:11));
-% step_info(8).tr1(17) = mean(step_info(8).tr1(1:16));
-% step_info(8).tr1(18) = mean(step_info(8).tr1(1:17));
-% step_info(8).tr1(19) = mean(step_info(8).tr1(1:18));
-% 
-% 
-% step_info(9).td1(9) = mean(step_info(9).td1(1:8));
-% step_info(9).ts1(3) = mean(step_info(9).ts1(1:2));
-% step_info(9).ts1(8) = mean(step_info(9).ts1(1:7));
-% step_info(9).ts1(10) = mean(step_info(9).ts1(1:9));
-% step_info(9).ts1(11) = mean(step_info(9).ts1(1:10));
-% step_info(9).ts1(15) = mean(step_info(9).ts1(1:14));
-% step_info(9).ts1(16) = mean(step_info(9).ts1(1:15));
-% step_info(9).ts1(17) = mean(step_info(9).ts1(1:16));
-% step_info(9).ts1(18) = mean(step_info(9).ts1(1:17));
-% step_info(9).ts1(19) = mean(step_info(9).ts1(1:18));
-% step_info(9).ts2(2) = mean(step_info(9).ts2(3:14));
-% step_info(9).ts2(18) = mean(step_info(9).ts2(1:17));
+step_info(8).td1(6) = [];
+step_info(8).td1(8-1) = [];
+step_info(8).td1(10-2) = [];
+step_info(8).td1(12-3) = [];
+step_info(8).td1(13-4) = [];
+step_info(8).td1(14-5) = [];
+step_info(8).ts1(1) = [];
+step_info(8).ts1(3-1) = [];
+step_info(8).ts1(4-2) = [];
+step_info(8).ts1(6-3) = [];
+step_info(8).ts1(7-4) = [];
+step_info(8).ts1(10-5) = [];
+step_info(8).ts1(11-6) = [];
+step_info(8).ts1(12-7) = [];
+step_info(8).ts1(13-8) = [];
+step_info(8).ts1(14-9) = [];
+step_info(8).ts1(15-10) = [];
+step_info(8).ts1(16-11) = [];
+step_info(8).ts1(17-12) = [];
+step_info(8).ts1(18-13) = [];
+step_info(8).ts1(19-14) = [];
+step_info(8).tr1(10) = [];
+step_info(8).tr1(12-1) = [];
+step_info(8).tr1(17-2) = [];
+step_info(8).tr1(18-3) = [];
+step_info(8).tr1(19-4) = [];
+step_info(8).td2(1) = [];
+step_info(8).td2(2-1) = [];
+step_info(8).td2(3-2) = [];
+step_info(8).td2(4-3) = [];
+step_info(8).td2(5-4) = [];
+
+step_info(9).ts1(1) = [];
+step_info(9).ts1(2-1) = [];
+step_info(9).ts1(3-2) = [];
+step_info(9).ts1(4-3) = [];
+step_info(9).ts1(5-4) = [];
+step_info(9).ts1(6-5) = [];
+step_info(9).ts1(7-6) = [];
+step_info(9).ts1(9-7) = [];
+step_info(9).ts1(13-8) = [];
+step_info(9).ts1(14-9) = [];
+step_info(9).ts1(16-10) = [];
+step_info(9).ts1(19-11) = [];
+
 
 %% Mean Value and Standar Deviation
 num_trials = 1;

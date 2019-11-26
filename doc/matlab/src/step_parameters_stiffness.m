@@ -68,11 +68,12 @@ end
 
 %% Stiffness Movement
 
+adjust_pos_final_value = 90;
 window_percentage = 3; %Size of window to calculate values
 
 %Final and Initial Values of Torque
 initial_value1 = output.filtered(t1_pos_output);
-final_value1 = output.filtered(tf1_pos_output);
+final_value1 = output.filtered(tf1_pos_output - adjust_pos_final_value);
 
 %Move torque data to the y positive axis
 output.filtered(:) = output.filtered(:) + abs(min_peak_value);
