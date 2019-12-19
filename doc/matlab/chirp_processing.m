@@ -65,6 +65,13 @@ end
 clear init_* final_pos;
 
 %% System Identification
+%tfest options
+opt = tfestOptions;
+opt.InitializeMethod = 'all';
+opt.SearchOptions.MaxIterations = 20;
+%opt.Focus = 'simulation';
+opt.Display = 'off';
+
 for i = 1:length(chirp_data)
     %Sample Time 
     for j = 2:length(chirp_data(i).timestamp)
@@ -74,10 +81,13 @@ for i = 1:length(chirp_data)
     
     gs(i).Trial = chirp_data(i).Trial;
     gs(i).sample_time = sample_time;
+    
+    opt.InitializeMethod = 'all';
+    
     %Frontal Motor Model
     data = iddata(chirp_data(i).m1_present,chirp_data(i).m1_goal,sample_time);
-    gs(i).model_frontal_motor = tfest(data,3,0,'Ts',sample_time);
-    gs(i).bandwidth_frontal_motor = bandwidth(gs(i).model_frontal_motor)/(2*pi);
+    gs(i).model.frontal_motor = tfest(data,3,0,'Ts',sample_time,opt);
+    gs(i).bandwidth.model_frontal_motor = bandwidth(gs(i).model.frontal_motor)/(2*pi);
     
     %Verify Model
     %compare(data,gs(i).model_frontal_motor)
@@ -85,40 +95,60 @@ for i = 1:length(chirp_data)
     
     %Posterior Motor Model
     data = iddata(chirp_data(i).m2_present,chirp_data(i).m2_goal,sample_time);
-    opt = tfestOptions;
-    opt.Focus = 'simulation';
-    gs(i).model_posterior_motor = tfest(data,3,0,'Ts',sample_time,opt); 
-    gs(i).bandwidth_posterior_motor = bandwidth(gs(i).model_posterior_motor)/(2*pi);
+    gs(i).model.posterior_motor = tfest(data,3,0,'Ts',sample_time,opt); 
+    gs(i).bandwidth.model_posterior_motor = bandwidth(gs(i).model.posterior_motor)/(2*pi);
     
     %Verify Model
     %compare(data,gs(i).model_frontal_motor) 
     
-    %Goal Angle Motors Function
-%     xt = []; yt = [];
-%     xt = chirp_data(i).m1_goal;
-%     yt = chirp_data(i).m2_goal;
-%     gs(i).goal_motors_function.p{1} = polyfit(xt,yt,1); 
-%     gs(i).goal_motors_function.R{1} = corrcoef(xt,yt); 
-%     gs(i).goal_motors_function.y = gs(i).goal_motors_function.p{1}(1)*xt + gs(i).goal_motors_function.p{1}(2);
-    
-%     %Torque - Angle Model
-%     data = iddata(chirp_data(i).torque,gs(i).goal_motors_function.y,sample_time);
-%     gs(i).model_torque = tfest(data,7,2,'Ts',sample_time);
-%     gs(i).bandwidth_torque = bandwidth(gs(i).model_torque)/(2*pi);
+ 
+    %Torque - Angle Model
+    data = iddata(chirp_data(i).torque,[-chirp_data(i).m1_present -chirp_data(i).m2_present],sample_time);
+    gs(i).model.angle_torque = tfest(data,[10 10],[3 3],'Ts',sample_time,opt);
+    tf1 = tf(gs(i).model.angle_torque.Structure(1,1).Numerator.Value,gs(i).model.angle_torque.Structure(1,1).Denominator.Value,sample_time);
+    tf2 = tf(gs(i).model.angle_torque.Structure(1,2).Numerator.Value,gs(i).model.angle_torque.Structure(1,2).Denominator.Value,sample_time);
+    gs(i).bandwidth.angle_torque = [bandwidth(tf1)/(2*pi) bandwidth(tf2)/(2*pi)];
     
 end
 
-clear data sample*;
+clear data sample* i j opt;
 
 %% Model Verification
 
 for i = 1:length(gs)
-    %% Motors Model
-   if gs(i).model_frontal_motor.Report.Fit.FitPercent < 80 || gs(i).model_posterior_motor.Report.Fit.FitPercent < 80
-       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Motors (Frontal-Posterrior): ' num2str(gs(i).model_frontal_motor.Report.Fit.FitPercent) ' -- ' num2str(gs(i).model_posterior_motor.Report.Fit.FitPercent)];
+    %%Motors Model
+   if gs(i).model.frontal_motor.Report.Fit.FitPercent < 75 
+       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Frontal Motor: ' num2str(gs(i).model.frontal_motor.Report.Fit.FitPercent)];
        warning('MyComponent:incorrectType',msg)
+       gs(i).model.frontal_motor = NaN;
+       gs(i).bandwidth.model_frontal_motor = 0;
+   end 
+   if gs(i).model.posterior_motor.Report.Fit.FitPercent < 75
+       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Posterior Motor: ' num2str(gs(i).model.posterior_motor.Report.Fit.FitPercent)];
+       warning('MyComponent:incorrectType',msg)
+       gs(i).model.posterior_motor = NaN;
+       gs(i).bandwidth.model_posterior_motor = 0;
+   end
+   if gs(i).model.angle_torque.Report.Fit.FitPercent < 75
+       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Angle-Torque: ' num2str(gs(i).model.angle_torque.Report.Fit.FitPercent)];
+       warning('MyComponent:incorrectType',msg)
+       gs(i).model.angle_torque = NaN;
+       gs(i).bandwidth.angle_torque = [0 0];
    end
 
+end
+clear msg i;
+
+%% Bandwidth Ao = Ai*0.5012
+
+for i = 1:length(chirp_data)    
+    [peaks pos_peaks] = findpeaks(chirp_trials(i).load_data.filtered);
+    max_peak = max(peaks);
+    pos_max_peak_vector = find(peaks == max_peak);
+    pos_max_peak = pos_peaks(pos_max_peak_vector);
+
+    limit_amp = max_peak*10^(-3/10);
+    limit_amp_pos = pos_peaks(find(peaks(pos_max_peak_vector:end) <= limit_amp,1));
 end
 
 %% Plots
