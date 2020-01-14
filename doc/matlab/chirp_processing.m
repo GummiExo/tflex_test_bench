@@ -4,10 +4,10 @@ cd data/chirp_response/
 files = dir('*.mat');
 
 %% Plot Data: If the variable is 1 the plots are activated
-plot_all_trials = 0; 
-plot_cut_trials = 0;
-plot_goal_presente_angle = 0;
-plot_bode = 0;
+plot_all_trials = 1; 
+plot_cut_trials = 1;
+plot_goal_presente_angle = 1;
+plot_bode = 1;
 
 %Parameters
 column_subplot = 4;
