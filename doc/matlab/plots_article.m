@@ -207,7 +207,7 @@ f = figure(4);
     posy = 0.18 + 0.5;
     set(l2,'Position',[posx posy pos(3) pos(4)]);
     xlabel('Time [s]','FontSize',font_size_axis,'FontName','FreeSerif')
-    set(gca,'FontSize',font_size_axis,'FontName','FreeSerif', 'yticFrontalklabel', sprintfc('\\color{black}%g', get(gca,'Ytick')))
+    set(gca,'FontSize',font_size_axis,'FontName','FreeSerif', 'yticklabel', sprintfc('\\color{black}%g', get(gca,'Ytick')))
     
     ylabel('Angle [deg]','FontSize',font_size_axis,'FontName','FreeSerif')
    

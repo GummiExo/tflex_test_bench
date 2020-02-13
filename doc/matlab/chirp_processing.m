@@ -4,10 +4,10 @@ cd data/chirp_response/
 files = dir('*.mat');
 
 %% Plot Data: If the variable is 1 the plots are activated
-plot_all_trials = 1; 
-plot_cut_trials = 1;
-plot_goal_presente_angle = 1;
-plot_bode = 1;
+plot_all_trials = 0; 
+plot_cut_trials = 0;
+plot_goal_presente_angle = 0;
+plot_bode = 0;
 
 %Parameters
 column_subplot = 4;
@@ -98,16 +98,14 @@ for i = 1:length(chirp_data)
     gs(i).model.posterior_motor = tfest(data,3,0,'Ts',sample_time,opt); 
     gs(i).bandwidth.model_posterior_motor = bandwidth(gs(i).model.posterior_motor)/(2*pi);
     
-    %Verify Model
-    %compare(data,gs(i).model_frontal_motor) 
-    
+ 
  
     %Torque - Angle Model
-    data = iddata(chirp_data(i).torque,[-chirp_data(i).m1_present -chirp_data(i).m2_present],sample_time);
-    gs(i).model.angle_torque = tfest(data,[10 10],[3 3],'Ts',sample_time,opt);
-    tf1 = tf(gs(i).model.angle_torque.Structure(1,1).Numerator.Value,gs(i).model.angle_torque.Structure(1,1).Denominator.Value,sample_time);
-    tf2 = tf(gs(i).model.angle_torque.Structure(1,2).Numerator.Value,gs(i).model.angle_torque.Structure(1,2).Denominator.Value,sample_time);
-    gs(i).bandwidth.angle_torque = [bandwidth(tf1)/(2*pi) bandwidth(tf2)/(2*pi)];
+    %data = iddata(chirp_data(i).torque,[-chirp_data(i).m1_present -chirp_data(i).m2_present],sample_time);
+    %gs(i).model.angle_torque = tfest(data,[10 10],[3 3],'Ts',sample_time,opt);
+    %tf1 = tf(gs(i).model.angle_torque.Structure(1,1).Numerator.Value,gs(i).model.angle_torque.Structure(1,1).Denominator.Value,sample_time);
+    %tf2 = tf(gs(i).model.angle_torque.Structure(1,2).Numerator.Value,gs(i).model.angle_torque.Structure(1,2).Denominator.Value,sample_time);
+    %gs(i).bandwidth.angle_torque = [bandwidth(tf1)/(2*pi) bandwidth(tf2)/(2*pi)];
     
 end
 
@@ -117,40 +115,67 @@ clear data sample* i j opt;
 
 for i = 1:length(gs)
     %%Motors Model
-   if gs(i).model.frontal_motor.Report.Fit.FitPercent < 75 
-       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Frontal Motor: ' num2str(gs(i).model.frontal_motor.Report.Fit.FitPercent)];
-       warning('MyComponent:incorrectType',msg)
-       gs(i).model.frontal_motor = NaN;
-       gs(i).bandwidth.model_frontal_motor = 0;
-   end 
-   if gs(i).model.posterior_motor.Report.Fit.FitPercent < 75
-       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Posterior Motor: ' num2str(gs(i).model.posterior_motor.Report.Fit.FitPercent)];
-       warning('MyComponent:incorrectType',msg)
-       gs(i).model.posterior_motor = NaN;
-       gs(i).bandwidth.model_posterior_motor = 0;
+   try
+       if gs(i).model.frontal_motor.Report.Fit.FitPercent < 75 
+           msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Frontal Motor: ' num2str(gs(i).model.frontal_motor.Report.Fit.FitPercent)];
+           warning('MyComponent:incorrectType',msg)
+           gs(i).model.frontal_motor = NaN;
+           gs(i).bandwidth.model_frontal_motor = 0;
+       end 
+   catch
    end
-   if gs(i).model.angle_torque.Report.Fit.FitPercent < 75
-       msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Angle-Torque: ' num2str(gs(i).model.angle_torque.Report.Fit.FitPercent)];
-       warning('MyComponent:incorrectType',msg)
-       gs(i).model.angle_torque = NaN;
-       gs(i).bandwidth.angle_torque = [0 0];
+   try
+       if gs(i).model.posterior_motor.Report.Fit.FitPercent < 75
+           msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Posterior Motor: ' num2str(gs(i).model.posterior_motor.Report.Fit.FitPercent)];
+           warning('MyComponent:incorrectType',msg)
+           gs(i).model.posterior_motor = NaN;
+           gs(i).bandwidth.model_posterior_motor = 0;
+       end
+   catch
+   end
+   try
+       if gs(i).model.angle_torque.Report.Fit.FitPercent < 75
+           msg = ['Model not adjusted: ' gs(i).Trial '\nFit Percentage Angle-Torque: ' num2str(gs(i).model.angle_torque.Report.Fit.FitPercent)];
+           warning('MyComponent:incorrectType',msg)
+           gs(i).model.angle_torque = NaN;
+           gs(i).bandwidth.angle_torque = [0 0];
+       end
+   catch
    end
 
 end
 clear msg i;
 
-%% Bandwidth Ao = Ai*0.5012
+
+%%  Maximum torque value 
+%TO DO 
+%Bandwidth Ao = Ai*0.5012
 
 for i = 1:length(chirp_data)    
-    [peaks pos_peaks] = findpeaks(chirp_trials(i).load_data.filtered);
-    max_peak = max(peaks);
-    pos_max_peak_vector = find(peaks == max_peak);
-    pos_max_peak = pos_peaks(pos_max_peak_vector);
-
-    limit_amp = max_peak*10^(-3/10);
-    limit_amp_pos = pos_peaks(find(peaks(pos_max_peak_vector:end) <= limit_amp,1));
+    [positive_peaks positive_pos_peaks] = findpeaks(chirp_trials(i).load_data.filtered);
+    max_positive_peak = max(positive_peaks);
+    pos_max_positive_peak_vector = find(positive_peaks == max_positive_peak);
+    pos_max_positive_peak = positive_pos_peaks(pos_max_positive_peak_vector);
+    
+    [negative_peaks negative_pos_peaks] = findpeaks(-chirp_trials(i).load_data.filtered);
+    max_negative_peak = max(negative_peaks);
+    pos_max_negative_peak_vector = find(negative_peaks == max_negative_peak);
+    pos_max_negative_peak = negative_pos_peaks(pos_max_negative_peak_vector);
+    
+    gs(i).max_values.flexion = max_negative_peak;
+    gs(i).max_values.extension = max_positive_peak;
+    
+    %limit_amp = max_peak*10^(-3/10);
+    %limit_amp_pos = pos_peaks(find(peaks(pos_max_peak_vector:end) <= limit_amp,1));
+    %gs(i).bandwidth
 end
 
+%% Save Data
+cd ../processed
+save('chirp_models.mat','gs');
+
+
+cd ../..
 %% Plots
 
 if plot_all_trials == 1
@@ -175,7 +200,7 @@ if plot_cut_trials == 1
            figure
            k = 1;
        end
-       subplot(column_subplot,1,k); plot(chirp_data(i).timestamp,chirp_data(i).y); hold on; plot(chirp_data(i).timestamp,chirp_data(i).u_present);
+       subplot(column_subplot,1,k); plot(chirp_data(i).timestamp,chirp_data(i).torque); hold on; plot(chirp_data(i).timestamp,chirp_data(i).m1_goal);
        title(chirp_trials(i).Trial,'Interpreter', 'none'); legend('Ankle Load','Motors Goal Angle')
        k = k+1;
     end
@@ -205,7 +230,10 @@ if plot_bode == 1
     legend_vector = '';
     for i = 1:length(gs)
        figure(all_trials_plot);
-       bode(gs(i).frontal_response,opts); hold on;
+       try
+           bode(tf(gs(i).model.frontal_motor.Numerator,gs(i).model.frontal_motor.Denominator,gs(i).model.frontal_motor.Ts),opts); hold on;
+       catch
+       end
        if (i-1) == column_subplot*j || i == 1
            j = j+1;
            bode_plots(j) = figure;
@@ -213,9 +241,13 @@ if plot_bode == 1
        end
        legend_vector = [legend_vector; {chirp_trials(i).Trial}];
        figure(bode_plots(j));
-       subplot(column_subplot,1,k); bode(gs(i).frontal_response,opts); hold on;
+       subplot(column_subplot,1,k); 
+                                try
+                                    bode(tf(gs(i).model.frontal_motor.Numerator,gs(i).model.frontal_motor.Denominator,gs(i).model.frontal_motor.Ts),opts); hold on;
                                     title(gs(i).Trial,'Interpreter', 'none'); 
                                     k = k+1;
+                                catch
+                                end
     end
     figure(all_trials_plot); legend(legend_vector);
 end
