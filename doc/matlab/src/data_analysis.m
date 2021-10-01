@@ -4,6 +4,7 @@ function res = data_analysis(trials_dir)
         
         %% Executing code as function
         motor_characteristics = ReadYaml('../../../../yaml/tilt.yaml');
+        %motor_characteristics = ReadYaml('../../../../yaml/tilt_human_trial.yaml');
         
         %% Executing code directly
         %motor_characteristics = ReadYaml('../../yaml/tilt.yaml'); 
@@ -86,8 +87,11 @@ function res = data_analysis(trials_dir)
 
 
         %% Data processing
-
-        load_data.filtered = medfilt1(load_data.Data,5);
+        try
+            load_data.filtered = medfilt1(load_data.Data,5);
+        catch
+            fprintf(" ");
+        end
         motor_states_frontal.Load_Percentage_filtered = medfilt1(motor_states_frontal.Load_Percentage,4);
         motor_states_posterior.Load_Percentage_filtered = medfilt1(motor_states_posterior.Load_Percentage,4);
         motor_states_frontal.Current_filtered = medfilt1(motor_states_frontal.Current,5);

@@ -14,19 +14,24 @@ function [motor_states_frontal, motor_states_posterior, load_data, frontal_loadc
     motor_states_posterior = cat(1,cat_data(:).MotorStates);
     motor_states_posterior = struct2table(rmfield(motor_states_posterior, 'MessageType'));
     clear cat_data; 
+    
+    try
+        %Torque Sensor
+        load_data_topic = select(bag,'Topic','/load_data');
+        load_data_msgs = readMessages(load_data_topic,'DataFormat','struct');
+        cat_data = cat(1,load_data_topic.MessageList{:,1});
+        load_data.Timestamp = cat_data;
+        clear cat_data;
 
-    %Torque Sensor
-    load_data_topic = select(bag,'Topic','/load_data');
-    load_data_msgs = readMessages(load_data_topic,'DataFormat','struct');
-    cat_data = cat(1,load_data_topic.MessageList{:,1});
-    load_data.Timestamp = cat_data;
-    clear cat_data;
-    cat_data = cat(1,load_data_msgs{:,1});
-    cat_data = rmfield(cat_data, 'MessageType');
-    data = struct2table(cat_data);
-    load_data.Data = data.Data;
-    clear cat_data data;
-    load_data = struct2table(cat(1,load_data));
+        cat_data = cat(1,load_data_msgs{:,1});
+        cat_data = rmfield(cat_data, 'MessageType');
+        data = struct2table(cat_data);
+        load_data.Data = data.Data;
+        clear cat_data data;
+        load_data = struct2table(cat(1,load_data));
+    catch
+        fprintf("Load Data not found");
+    end
 
     %Loadcell sensors
     frontal_loadcell_data_topic = select(bag,'Topic','/frontal_loadcell_data');
